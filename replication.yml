@@ -81,14 +81,6 @@ replications:
     output: artifacts/staging/tab_3_stata.log
     artifact: artifacts/tab_3.html
 
-  - id: fig_1
-    group: fig_1
-    type: figure
-    label: Figure 1
-    description: Formal selection procedures in the Chinese bureaucracy
-    artifact: artifacts/fig_1.png
-    note: Static schematic figure (no replication code in archive)
-
   - id: fig_2
     group: fig_2
     type: figure
@@ -104,14 +96,6 @@ replications:
       - matplotlib
       - seaborn
       - scipy
-
-  - id: fig_3
-    group: fig_3
-    type: figure
-    label: Figure 3
-    description: Average faces by facial rating and gender
-    artifact: artifacts/fig_3.png
-    note: Image-morphing pipeline not included in delivered archive; placeholder artifact
 
   - id: fig_4
     group: fig_4

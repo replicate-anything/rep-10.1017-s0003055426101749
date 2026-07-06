@@ -18,6 +18,8 @@ cap mkdir "${maindir}/data"
 cap mkdir "${rawdir}"
 cap mkdir "${processed}"
 
+do "${maindir}/code/helpers/install_stata_deps.do"
+
 clear all
 use "${rawdir}/all_asperson_original.dta", clear
 gen _sortorder = _n

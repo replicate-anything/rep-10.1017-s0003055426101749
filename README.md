@@ -21,7 +21,7 @@ Author delivery materials (appendix scripts, codebook) live in the monorepo sour
 1. **construct_analysis_dataset** — merge CPED biographical data → `data/processed/all_asperson_fulldata.dta`
 2. **run_random_forest** (optional for Figure 4) — Python notebook → `promotion_results.csv`, `purge_results.csv` (CSVs already shipped in `data/raw/`)
 3. **Tables 1–3** — Stata (`requires: construct_analysis_dataset`)
-4. **Figures** — Figure 2 (Python), Figures 4–5 (R); Figures 1 & 3 are static schematics (artifact only)
+4. **Figures** — Figure 2 (Python), Figures 4–5 (R)
 
 ## Quick start
 
