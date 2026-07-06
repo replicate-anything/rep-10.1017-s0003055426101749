@@ -1,0 +1,6 @@
+.Rproj.user/
+*.log
+artifacts/staging/
+data/processed/*.dta
+data/raw/*.dta
+!data/raw/README.md

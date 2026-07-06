@@ -1,0 +1,153 @@
+paper:
+  doi: https://doi.org/10.1017/S0003055426101749
+  title: "Portraits of Power: Facial Appearance and the Tacit Domain of Political Selection in China"
+  journal: American Political Science Review
+  year: 2026
+  authors: Junyan Jiang, Songpo Yang
+  dependencies:
+    - haven
+    - ggplot2
+    - dplyr
+    - readr
+    - tidytext
+
+repo: replicate-anything/rep-10.1017-s0003055426101749
+
+prep:
+  - id: construct_analysis_dataset
+    type: step
+    label: Construct analysis dataset
+    description: Merge CPED biographical variables into person-rank data
+    engine: stata
+    code: code/steps/construct_analysis_dataset.do
+    inputs:
+      - data/raw/all_asperson_original.dta
+      - data/raw/CPED_2022.dta
+    output: data/processed/all_asperson_fulldata.dta
+
+  - id: run_random_forest
+    type: step
+    label: Random forest feature importance
+    description: Train random forest models (produces promotion_results.csv and purge_results.csv)
+    engine: python
+    code: code/steps/run_random_forest.ipynb
+    inputs:
+      - data/processed/all_asperson_fulldata.dta
+    output: data/raw/promotion_results.csv
+
+replications:
+  - id: tab_1
+    group: tab_1
+    type: table
+    label: Table 1
+    description: Baseline results — promotion and purge
+    engine: stata
+    requires:
+      - construct_analysis_dataset
+    data: data/processed/all_asperson_fulldata.dta
+    code: code/tables/tab_1.do
+    format: code/helpers/format_stata.R
+    output: artifacts/staging/tab_1_stata.log
+    artifact: artifacts/tab_1.html
+    dependencies:
+      - reghdfe
+      - estout
+
+  - id: tab_2
+    group: tab_2
+    type: table
+    label: Table 2
+    description: Influence of facial features by promotion steps
+    engine: stata
+    requires:
+      - construct_analysis_dataset
+    data: data/processed/all_asperson_fulldata.dta
+    code: code/tables/tab_2.do
+    format: code/helpers/format_stata.R
+    output: artifacts/staging/tab_2_stata.log
+    artifact: artifacts/tab_2.html
+
+  - id: tab_3
+    group: tab_3
+    type: table
+    label: Table 3
+    description: Gender-specific marginal effects (pooled interaction model)
+    engine: stata
+    requires:
+      - construct_analysis_dataset
+    data: data/processed/all_asperson_fulldata.dta
+    code: code/tables/tab_3.do
+    format: code/helpers/format_stata.R
+    output: artifacts/staging/tab_3_stata.log
+    artifact: artifacts/tab_3.html
+
+  - id: fig_1
+    group: fig_1
+    type: figure
+    label: Figure 1
+    description: Formal selection procedures in the Chinese bureaucracy
+    artifact: artifacts/fig_1.png
+    note: Static schematic figure (no replication code in archive)
+
+  - id: fig_2
+    group: fig_2
+    type: figure
+    label: Figure 2
+    description: Human versus machine ratings from 10-fold cross-validation
+    engine: python
+    code: code/figures/fig_2.py
+    data: data/raw/10fold_training_results.csv
+    output: artifacts/fig_2.png
+    artifact: artifacts/fig_2.png
+    dependencies:
+      - pandas
+      - matplotlib
+      - seaborn
+      - scipy
+
+  - id: fig_3
+    group: fig_3
+    type: figure
+    label: Figure 3
+    description: Average faces by facial rating and gender
+    artifact: artifacts/fig_3.png
+    note: Image-morphing pipeline not included in delivered archive; placeholder artifact
+
+  - id: fig_4
+    group: fig_4
+    type: figure
+    label: Figure 4
+    description: Relative importance of facial appearances in predicting promotion and purge
+    engine: r
+    requires:
+      - run_random_forest
+    code: code/figures/fig_4.R
+    format: format_fig_4
+    data:
+      - data/raw/promotion_results.csv
+      - data/raw/purge_results.csv
+    artifact: artifacts/fig_4.png
+    dependencies:
+      - ggplot2
+      - dplyr
+      - readr
+      - tidytext
+
+  - id: fig_5
+    group: fig_5
+    type: figure
+    label: Figure 5
+    description: Conjoint experiment results on individual selection preferences
+    engine: r
+    code: code/figures/fig_5.R
+    format: format_fig_5
+    data:
+      - data/raw/attractiveness.csv
+      - data/raw/trustworthiness.csv
+      - data/raw/competence.csv
+      - data/raw/aggressiveness.csv
+    artifact: artifacts/fig_5.png
+    dependencies:
+      - ggplot2
+      - dplyr
+      - readr
