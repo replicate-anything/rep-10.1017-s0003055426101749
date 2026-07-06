@@ -1,6 +1,20 @@
 {
-  "generated": "2026-07-06",
-  "artifacts": {
-    "fig_2": "artifacts/fig_2.png"
+  "generated": "2026-07-07",
+  "replications": {
+    "fig_2": {
+      "status": "ok",
+      "artifact": "artifacts/fig_2.png",
+      "format": "ggplot"
+    },
+    "fig_4": {
+      "status": "ok",
+      "artifact": "artifacts/fig_4.png",
+      "format": "ggplot"
+    },
+    "fig_5": {
+      "status": "ok",
+      "artifact": "artifacts/fig_5.png",
+      "format": "ggplot"
+    }
   }
 }
