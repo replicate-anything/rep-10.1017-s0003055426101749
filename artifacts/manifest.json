@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-07T15:42:56Z",
+  "generated_at": "2026-07-07T16:05:27Z",
   "folder": "10.1017_s0003055426101749",
   "doi": "10.1017/s0003055426101749",
   "prep": {
@@ -14,16 +14,19 @@
   },
   "replications": {
     "tab_1": {
-      "status": "error",
-      "message": "Stata replication failed.\nStata ran: yes\nExecutable: C:/Program Files/Stata17/StataMP-64.exe\nInvocation: /e do C:/Users/humphreys/AppData/Local/Temp/RtmpGYHZzQ/replicateEverything-stata/run5c7854ebc95/.run/replicate_tab_1.do\nExit status: 0\nDo-file: rep-10.1017-s0003055426101749/code/tables/tab_1.do\nWorking directory: rep-10.1017-s0003055426101749\nStaging directory: rep-10.1017-s0003055426101749/artifacts/staging\nLog file: C:\\Users\\HUMPHR~1\\AppData\\Local\\Temp\\RtmpGYHZzQ/replicateEverything-stata\\run5c7854ebc95/.run/replicate_tab_1.log\nLog exists: yes\nStata error:\n> install it:\n - install from SSC\n - install from GitHub\nr(9);\n\nLog tail:\n. label var aggressiveness \"Perceived aggressiveness\"\n\n. \n. egen std_att = std(attractiveness)\n(21 missing values generated)\n\n. egen std_trust = std(trustworthiness)\n(21 missing values generated)\n\n. egen std_comp = std(competence)\n(21 missing values generated)\n\n. egen std_agg = std(aggressiveness)\n(21 missing values generated)\n\n. \n. global cov female han i.edulevel\n\n. \nend of do-file\n\n. \n. eststo clear\n\n. eststo m1: reghdfe maxrank attractiveness female han i.edulevel if toprank ==\n>  1 & proper == 1, a(byear birth_city) cluster(bcity) keepsing\nreghdfe requires uses the require package to maintain its dependencies; please \n> install it:\n - install from SSC\n - install from GitHub\nr(9);\n\nend of do-file\nr(9);\n\nend of do-file\nr(9);\n\nend of do-file\nr(9);\nSuggested Stata setup:\n  ssc install reghdfe, replace\n  ssc install estout, replace\n"
+      "status": "ok",
+      "artifact": "artifacts/tab_1.html",
+      "format": "html"
     },
     "tab_2": {
-      "status": "error",
-      "message": "Stata replication failed.\nStata ran: yes\nExecutable: C:/Program Files/Stata17/StataMP-64.exe\nInvocation: /e do C:/Users/humphreys/AppData/Local/Temp/RtmpGYHZzQ/replicateEverything-stata/run5c783185601a/.run/replicate_tab_2.do\nExit status: 0\nDo-file: rep-10.1017-s0003055426101749/code/tables/tab_2.do\nWorking directory: rep-10.1017-s0003055426101749\nStaging directory: rep-10.1017-s0003055426101749/artifacts/staging\nLog file: C:\\Users\\HUMPHR~1\\AppData\\Local\\Temp\\RtmpGYHZzQ/replicateEverything-stata\\run5c783185601a/.run/replicate_tab_2.log\nLog exists: yes\nStata error:\n> install it:\n - install from SSC\n - install from GitHub\nr(9);\n\nLog tail:\n\n. restore\n\n. \n. clear\n\n. use \"${result}/step1.dta\"\n\n. append using \"${result}/step2.dta\"\n(label bcity already defined)\n\n. append using \"${result}/step3.dta\"\n(label bcity already defined)\n\n. \n. fvset base 1 promotion_step\n\n. \n. global facial_traits \"c.attractiveness c.competence c.trustworthiness c.aggre\n> ssiveness\"\n\n. global controls \"female han i.edulevel\"\n\n. \n. reghdfe promoted i.promotion_step##($facial_traits) $controls, a(byear birth_\n> city) cluster(bcity)\nreghdfe requires uses the require package to maintain its dependencies; please \n> install it:\n - install from SSC\n - install from GitHub\nr(9);\n\nend of do-file\nr(9);\n\nend of do-file\nr(9);\n\nend of do-file\nr(9);\nSuggested Stata setup:\n  ssc install reghdfe, replace\n"
+      "status": "ok",
+      "artifact": "artifacts/tab_2.html",
+      "format": "html"
     },
     "tab_3": {
-      "status": "error",
-      "message": "Stata replication failed.\nStata ran: yes\nExecutable: C:/Program Files/Stata17/StataMP-64.exe\nInvocation: /e do C:/Users/humphreys/AppData/Local/Temp/RtmpGYHZzQ/replicateEverything-stata/run5c78389fcf6/.run/replicate_tab_3.do\nExit status: 0\nDo-file: rep-10.1017-s0003055426101749/code/tables/tab_3.do\nWorking directory: rep-10.1017-s0003055426101749\nStaging directory: rep-10.1017-s0003055426101749/artifacts/staging\nLog file: C:\\Users\\HUMPHR~1\\AppData\\Local\\Temp\\RtmpGYHZzQ/replicateEverything-stata\\run5c78389fcf6/.run/replicate_tab_3.log\nLog exists: yes\nStata error:\n> install it:\n - install from SSC\n - install from GitHub\nr(9);\n\nLog tail:\n(21 missing values generated)\n\n. egen std_trust = std(trustworthiness)\n(21 missing values generated)\n\n. egen std_comp = std(competence)\n(21 missing values generated)\n\n. egen std_agg = std(aggressiveness)\n(21 missing values generated)\n\n. \n. global cov female han i.edulevel\n\n. \nend of do-file\n\n. \n. global facial_traits \"c.attractiveness c.competence c.trustworthiness c.aggre\n> ssiveness\"\n\n. global controls \"han i.edulevel\"\n\n. \n. reghdfe maxrank i.female##($facial_traits) $controls if toprank == 1 & proper\n>  == 1, a(byear birth_city) cluster(bcity)\nreghdfe requires uses the require package to maintain its dependencies; please \n> install it:\n - install from SSC\n - install from GitHub\nr(9);\n\nend of do-file\nr(9);\n\nend of do-file\nr(9);\n\nend of do-file\nr(9);\nSuggested Stata setup:\n  ssc install reghdfe, replace\n"
+      "status": "ok",
+      "artifact": "artifacts/tab_3.html",
+      "format": "html"
     },
     "fig_2": {
       "status": "ok",

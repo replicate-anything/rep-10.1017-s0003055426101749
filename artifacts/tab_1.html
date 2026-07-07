@@ -1,0 +1,568 @@
+<pre class="stata-output replication-table">. 
+. do "${maindir}/code/tables/mk_tab_1.do"
+. clear
+. use "${processed}/all_asperson_fulldata.dta", clear
+. do "${maindir}/code/helpers/setup_analysis.do"
+. * Shared data preparation after loading all_asperson_fulldata.dta
+. 
+. do "${maindir}/code/helpers/install_stata_deps.do"
+. * Install SSC dependencies for this study (batch / server safe).
+. * First run needs internet access. Uses reghdfe 5.x from SSC (author replicat
+. * Reghdfe 6.x from GitHub requires the separate "require" package — not used 
+. 
+. version 17
+. set more off, permanently
+(set more preference recorded)
+. cap set netmsg off
+. 
+. * Drop GitHub 6.x stack when "require" is present; reinstall SSC 5.x.
+. cap which require
+. if !_rc {
+.     di as txt "Reinstalling SSC ftools/reghdfe (replacing reghdfe 6.x / requi
+Reinstalling SSC ftools/reghdfe (replacing reghdfe 6.x / require stack)...
+.     cap ado uninstall reghdfe
+.     cap ado uninstall ftools
+. }
+. 
+. cap which ftools
+. if _rc {
+.     di as txt "Installing ftools from SSC..."
+Installing ftools from SSC...
+.     ssc install ftools, replace
+checking ftools consistency and verifying not already installed...
+installing into C:\Users\humphreys\ado\plus\...
+installation complete.
+. }
+. cap noisily ftools, compile
+(compiling lftools.mlib for Stata 17)
+(library saved in C:\Users\humphreys\ado\plus/l/lftools.mlib)
+. cap mata: mata mlib index
+. 
+. cap which reghdfe
+. if _rc {
+.     di as txt "Installing reghdfe from SSC..."
+Installing reghdfe from SSC...
+.     ssc install reghdfe, replace
+checking reghdfe consistency and verifying not already installed...
+installing into C:\Users\humphreys\ado\plus\...
+installation complete.
+. }
+. 
+. cap which estout
+. if _rc {
+.     di as txt "Installing estout from SSC..."
+.     ssc install estout, replace
+. }
+. 
+. cap which reghdfe
+. if _rc {
+.     di as err "reghdfe is not installed."
+.     di as err "Run interactively once: ssc install ftools, replace"
+.     di as err "  ftools, compile"
+.     di as err "  ssc install reghdfe, replace"
+.     di as err "  ssc install estout, replace"
+.     exit 498
+. }
+. 
+. cap which eststo
+. if _rc {
+.     di as err "eststo not found — run: ssc install estout, replace"
+.     exit 498
+. }
+. 
+end of do-file
+. 
+. encode education, gen(edu)
+. encode birth_city, gen(bcity)
+. encode nation, gen(ethnic)
+. g edulevel = 0
+. replace edulevel = 1 if education == "大学" | education == "专科" | education
+(1,740 real changes made)
+. replace edulevel = 2 if education == "硕士" | education == "博士"
+(4,457 real changes made)
+. egen maxrank = max(rank), by(name birthyear)
+. g toprank = rank == maxrank
+. g by = substr(birthyear, 1, 4)
+(39 missing values generated)
+. destring by, gen(byear)
+by: all characters numeric; byear generated as int
+(39 missing values generated)
+. generate han = (nation == "汉族")
+. tostring name, replace
+name already string; no replace
+. merge m:1 name byear birth_prov using "${rawdir}/proper.dta"
+(variable byear was int, now double to accommodate using data's values)
+    Result                      Number of obs
+    Not matched                           891
+        from master                       889  (_merge==1)
+        from using                          2  (_merge==2)
+    Matched                             5,469  (_merge==3)
+. g proper = _merge == 3
+. drop _merge
+. 
+. label var attractiveness "Perceived attractiveness"
+. label var trustworthiness "Perceived trustworthiness"
+. label var competence "Perceived competence"
+. label var aggressiveness "Perceived aggressiveness"
+. 
+. egen std_att = std(attractiveness)
+(21 missing values generated)
+. egen std_trust = std(trustworthiness)
+(21 missing values generated)
+. egen std_comp = std(competence)
+(21 missing values generated)
+. egen std_agg = std(aggressiveness)
+(21 missing values generated)
+. 
+. global cov female han i.edulevel
+. 
+end of do-file
+. 
+. eststo clear
+. eststo m1: reghdfe maxrank attractiveness female han i.edulevel if toprank ==
+WARNING: Singleton observations not dropped; statistical significance is biased
+(MWFE estimator converged in 8 iterations)
+HDFE Linear regression                            Number of obs   =      4,071
+Absorbing 2 HDFE groups                           F(   5,    403) =      12.81
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.2529
+                                                  Adj R-squared   =     0.1582
+                                                  Within R-sq.    =     0.0196
+Number of clusters (bcity)   =        404         Root MSE        =     0.7708
+                                (Std. err. adjusted for 404 clusters in bcity)
+             |               Robust
+     maxrank | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+attractive~s |   .2624336   .0555992     4.72   0.000      .153133    .3717342
+      female |   .2178596   .0513729     4.24   0.000     .1168672     .318852
+         han |  -.0564741   .0566599    -1.00   0.319    -.1678599    .0549117
+             |
+    edulevel |
+          1  |   .4898692    .192975     2.54   0.012     .1105058    .8692326
+          2  |   .6407079   .1996003     3.21   0.001     .2483201    1.033096
+             |
+       _cons |   .1281443   .2663364     0.48   0.631    -.3954379    .6517265
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+       byear |        51           1          50     |
+  birth_city |       404         404           0    *|
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+. estadd local birth "$\checkmark$"
+added macro:
+              e(birth) : "$\checkmark$"
+. estadd local birth_city "$\checkmark$"
+added macro:
+         e(birth_city) : "$\checkmark$"
+. estadd local cov "$\checkmark$"
+added macro:
+                e(cov) : "$\checkmark$"
+. 
+. eststo m2: reghdfe maxrank competence female han i.edulevel if toprank == 1 &
+WARNING: Singleton observations not dropped; statistical significance is biased
+(MWFE estimator converged in 8 iterations)
+HDFE Linear regression                            Number of obs   =      4,071
+Absorbing 2 HDFE groups                           F(   5,    403) =      18.84
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.2585
+                                                  Adj R-squared   =     0.1645
+                                                  Within R-sq.    =     0.0269
+Number of clusters (bcity)   =        404         Root MSE        =     0.7680
+                                (Std. err. adjusted for 404 clusters in bcity)
+             |               Robust
+     maxrank | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+  competence |   .4261556   .0641069     6.65   0.000     .3001299    .5521813
+      female |    .233347   .0511448     4.56   0.000     .1328031    .3338908
+         han |  -.0498694   .0554672    -0.90   0.369    -.1589106    .0591717
+             |
+    edulevel |
+          1  |   .4904475   .1891359     2.59   0.010     .1186312    .8622637
+          2  |   .6403561   .1961987     3.26   0.001     .2546554    1.026057
+             |
+       _cons |  -.4475499   .2790891    -1.60   0.110    -.9962023    .1011024
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+       byear |        51           1          50     |
+  birth_city |       404         404           0    *|
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+. estadd local birth "$\checkmark$"
+added macro:
+              e(birth) : "$\checkmark$"
+. estadd local birth_city "$\checkmark$"
+added macro:
+         e(birth_city) : "$\checkmark$"
+. estadd local cov "$\checkmark$"
+added macro:
+                e(cov) : "$\checkmark$"
+. 
+. eststo m3: reghdfe maxrank trustworthiness female han i.edulevel if toprank =
+WARNING: Singleton observations not dropped; statistical significance is biased
+(MWFE estimator converged in 8 iterations)
+HDFE Linear regression                            Number of obs   =      4,071
+Absorbing 2 HDFE groups                           F(   5,    403) =      17.52
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.2571
+                                                  Adj R-squared   =     0.1629
+                                                  Within R-sq.    =     0.0250
+Number of clusters (bcity)   =        404         Root MSE        =     0.7687
+                                (Std. err. adjusted for 404 clusters in bcity)
+             |               Robust
+     maxrank | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+trustworth~s |   .4114718   .0656939     6.26   0.000     .2823263    .5406174
+      female |   .2269848   .0510144     4.45   0.000     .1266972    .3272724
+         han |  -.0549301   .0552678    -0.99   0.321    -.1635794    .0537192
+             |
+    edulevel |
+          1  |   .5236547   .1899594     2.76   0.006     .1502196    .8970899
+          2  |   .6787992   .1976214     3.43   0.001     .2903016    1.067297
+             |
+       _cons |   -.466751   .3202249    -1.46   0.146    -1.096271    .1627688
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+       byear |        51           1          50     |
+  birth_city |       404         404           0    *|
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+. estadd local birth "$\checkmark$"
+added macro:
+              e(birth) : "$\checkmark$"
+. estadd local birth_city "$\checkmark$"
+added macro:
+         e(birth_city) : "$\checkmark$"
+. estadd local cov "$\checkmark$"
+added macro:
+                e(cov) : "$\checkmark$"
+. 
+. eststo m4: reghdfe maxrank aggressiveness female han i.edulevel if toprank ==
+WARNING: Singleton observations not dropped; statistical significance is biased
+(MWFE estimator converged in 8 iterations)
+HDFE Linear regression                            Number of obs   =      4,071
+Absorbing 2 HDFE groups                           F(   5,    403) =      14.98
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.2522
+                                                  Adj R-squared   =     0.1573
+                                                  Within R-sq.    =     0.0186
+Number of clusters (bcity)   =        404         Root MSE        =     0.7712
+                                (Std. err. adjusted for 404 clusters in bcity)
+             |               Robust
+     maxrank | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+aggressive~s |  -.2962612   .0684926    -4.33   0.000    -.4309086   -.1616139
+      female |   .2196924   .0522429     4.21   0.000     .1169897    .3223951
+         han |    -.05643   .0545967    -1.03   0.302    -.1637598    .0508999
+             |
+    edulevel |
+          1  |   .5190249   .1892289     2.74   0.006     .1470257     .891024
+          2  |   .6748338   .1960489     3.44   0.001     .2894276     1.06024
+             |
+       _cons |   1.649534   .2702909     6.10   0.000     1.118178     2.18089
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+       byear |        51           1          50     |
+  birth_city |       404         404           0    *|
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+. estadd local birth "$\checkmark$"
+added macro:
+              e(birth) : "$\checkmark$"
+. estadd local birth_city "$\checkmark$"
+added macro:
+         e(birth_city) : "$\checkmark$"
+. estadd local cov "$\checkmark$"
+added macro:
+                e(cov) : "$\checkmark$"
+. 
+. eststo m5: reghdfe maxrank attractiveness trustworthiness competence aggressi
+WARNING: Singleton observations not dropped; statistical significance is biased
+(MWFE estimator converged in 8 iterations)
+HDFE Linear regression                            Number of obs   =      4,071
+Absorbing 2 HDFE groups                           F(   8,    403) =      14.84
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.2633
+                                                  Adj R-squared   =     0.1692
+                                                  Within R-sq.    =     0.0332
+Number of clusters (bcity)   =        404         Root MSE        =     0.7658
+                                (Std. err. adjusted for 404 clusters in bcity)
+             |               Robust
+     maxrank | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+attractive~s |     .05731   .0600384     0.95   0.340    -.0607174    .1753375
+trustworth~s |    .261895   .0715603     3.66   0.000     .1212168    .4025731
+  competence |   .2842341   .0686158     4.14   0.000     .1493445    .4191236
+aggressive~s |  -.2406306   .0672496    -3.58   0.000    -.3728344   -.1084269
+      female |   .2172873   .0509626     4.26   0.000     .1171017     .317473
+         han |  -.0523324   .0548161    -0.95   0.340    -.1600936    .0554288
+             |
+    edulevel |
+          1  |   .5192844   .1882771     2.76   0.006     .1491565    .8894122
+          2  |   .6687828   .1951923     3.43   0.001     .2850605    1.052505
+             |
+       _cons |  -.3481216   .3814175    -0.91   0.362    -1.097938    .4016948
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+       byear |        51           1          50     |
+  birth_city |       404         404           0    *|
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+. estadd local birth "$\checkmark$"
+added macro:
+              e(birth) : "$\checkmark$"
+. estadd local birth_city "$\checkmark$"
+added macro:
+         e(birth_city) : "$\checkmark$"
+. estadd local cov "$\checkmark$"
+added macro:
+                e(cov) : "$\checkmark$"
+. 
+. eststo m1b: reghdfe purge attractiveness female han i.edulevel if toprank == 
+WARNING: Singleton observations not dropped; statistical significance is biased
+(MWFE estimator converged in 8 iterations)
+HDFE Linear regression                            Number of obs   =      4,071
+Absorbing 2 HDFE groups                           F(   5,    403) =       8.84
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.1246
+                                                  Adj R-squared   =     0.0136
+                                                  Within R-sq.    =     0.0054
+Number of clusters (bcity)   =        404         Root MSE        =     0.2859
+                                (Std. err. adjusted for 404 clusters in bcity)
+             |               Robust
+       purge | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+attractive~s |  -.0731309   .0235879    -3.10   0.002    -.1195016   -.0267603
+      female |  -.0343839   .0155699    -2.21   0.028    -.0649923   -.0037755
+         han |  -.0060648   .0204207    -0.30   0.767    -.0462092    .0340797
+             |
+    edulevel |
+          1  |    .129621   .0275655     4.70   0.000     .0754309    .1838111
+          2  |   .1467443   .0270976     5.42   0.000     .0934739    .2000147
+             |
+       _cons |    .160221   .0718415     2.23   0.026     .0189902    .3014519
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+       byear |        51           1          50     |
+  birth_city |       404         404           0    *|
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+. estadd local birth "$\checkmark$"
+added macro:
+              e(birth) : "$\checkmark$"
+. estadd local birth_city "$\checkmark$"
+added macro:
+         e(birth_city) : "$\checkmark$"
+. estadd local cov "$\checkmark$"
+added macro:
+                e(cov) : "$\checkmark$"
+. 
+. eststo m2b: reghdfe purge competence female han i.edulevel if toprank == 1 & 
+WARNING: Singleton observations not dropped; statistical significance is biased
+(MWFE estimator converged in 8 iterations)
+HDFE Linear regression                            Number of obs   =      4,071
+Absorbing 2 HDFE groups                           F(   5,    403) =      11.16
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.1263
+                                                  Adj R-squared   =     0.0156
+                                                  Within R-sq.    =     0.0074
+Number of clusters (bcity)   =        404         Root MSE        =     0.2856
+                                (Std. err. adjusted for 404 clusters in bcity)
+             |               Robust
+       purge | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+  competence |  -.0978226   .0212099    -4.61   0.000    -.1395184   -.0561268
+      female |   -.038609   .0156659    -2.46   0.014     -.069406    -.007812
+         han |  -.0076281   .0207123    -0.37   0.713    -.0483456    .0330895
+             |
+    edulevel |
+          1  |   .1288935   .0286391     4.50   0.000     .0725928    .1851941
+          2  |   .1459542   .0283423     5.15   0.000     .0902369    .2016714
+             |
+       _cons |   .2574157   .0710567     3.62   0.000     .1177277    .3971038
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+       byear |        51           1          50     |
+  birth_city |       404         404           0    *|
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+. estadd local birth "$\checkmark$"
+added macro:
+              e(birth) : "$\checkmark$"
+. estadd local birth_city "$\checkmark$"
+added macro:
+         e(birth_city) : "$\checkmark$"
+. estadd local cov "$\checkmark$"
+added macro:
+                e(cov) : "$\checkmark$"
+. 
+. eststo m3b: reghdfe purge trustworthiness female han i.edulevel if toprank ==
+WARNING: Singleton observations not dropped; statistical significance is biased
+(MWFE estimator converged in 8 iterations)
+HDFE Linear regression                            Number of obs   =      4,071
+Absorbing 2 HDFE groups                           F(   5,    403) =       9.57
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.1258
+                                                  Adj R-squared   =     0.0149
+                                                  Within R-sq.    =     0.0068
+Number of clusters (bcity)   =        404         Root MSE        =     0.2857
+                                (Std. err. adjusted for 404 clusters in bcity)
+             |               Robust
+       purge | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+trustworth~s |  -.0957511   .0259652    -3.69   0.000    -.1467953    -.044707
+      female |  -.0371343   .0157557    -2.36   0.019    -.0681079   -.0061608
+         han |  -.0064683   .0206652    -0.31   0.754    -.0470933    .0341568
+             |
+    edulevel |
+          1  |   .1212024   .0271737     4.46   0.000     .0677826    .1746222
+          2  |   .1370654    .026928     5.09   0.000     .0841284    .1900024
+             |
+       _cons |   .2659485   .0865365     3.07   0.002     .0958292    .4360677
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+       byear |        51           1          50     |
+  birth_city |       404         404           0    *|
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+. estadd local birth "$\checkmark$"
+added macro:
+              e(birth) : "$\checkmark$"
+. estadd local birth_city "$\checkmark$"
+added macro:
+         e(birth_city) : "$\checkmark$"
+. estadd local cov "$\checkmark$"
+added macro:
+                e(cov) : "$\checkmark$"
+. 
+. eststo m4b: reghdfe purge aggressiveness female han i.edulevel if toprank == 
+WARNING: Singleton observations not dropped; statistical significance is biased
+(MWFE estimator converged in 8 iterations)
+HDFE Linear regression                            Number of obs   =      4,071
+Absorbing 2 HDFE groups                           F(   5,    403) =       7.07
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.1223
+                                                  Adj R-squared   =     0.0110
+                                                  Within R-sq.    =     0.0028
+Number of clusters (bcity)   =        404         Root MSE        =     0.2862
+                                (Std. err. adjusted for 404 clusters in bcity)
+             |               Robust
+       purge | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+aggressive~s |   .0109805   .0259554     0.42   0.672    -.0400445    .0620055
+      female |  -.0377476   .0157953    -2.39   0.017    -.0687992   -.0066961
+         han |  -.0062986   .0207332    -0.30   0.761    -.0470573    .0344601
+             |
+    edulevel |
+          1  |   .1256146   .0280929     4.47   0.000     .0703877    .1808415
+          2  |   .1411959   .0278452     5.07   0.000     .0864558    .1959359
+             |
+       _cons |  -.0680986   .0756051    -0.90   0.368    -.2167282     .080531
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+       byear |        51           1          50     |
+  birth_city |       404         404           0    *|
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+. estadd local birth "$\checkmark$"
+added macro:
+              e(birth) : "$\checkmark$"
+. estadd local birth_city "$\checkmark$"
+added macro:
+         e(birth_city) : "$\checkmark$"
+. estadd local cov "$\checkmark$"
+added macro:
+                e(cov) : "$\checkmark$"
+. 
+. eststo m5b: reghdfe purge attractiveness competence trustworthiness aggressiv
+WARNING: Singleton observations not dropped; statistical significance is biased
+(MWFE estimator converged in 8 iterations)
+HDFE Linear regression                            Number of obs   =      4,071
+Absorbing 2 HDFE groups                           F(   8,    403) =       7.59
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.1280
+                                                  Adj R-squared   =     0.0166
+                                                  Within R-sq.    =     0.0093
+Number of clusters (bcity)   =        404         Root MSE        =     0.2854
+                                (Std. err. adjusted for 404 clusters in bcity)
+             |               Robust
+       purge | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+attractive~s |  -.0261978   .0275363    -0.95   0.342    -.0803305    .0279349
+  competence |  -.0647854    .024555    -2.64   0.009    -.1130573   -.0165135
+trustworth~s |  -.0593176   .0284268    -2.09   0.038     -.115201   -.0034342
+aggressive~s |  -.0015578   .0265247    -0.06   0.953    -.0537019    .0505863
+      female |  -.0365152   .0153884    -2.37   0.018    -.0667667   -.0062636
+         han |  -.0071835   .0205702    -0.35   0.727    -.0476218    .0332549
+             |
+    edulevel |
+          1  |   .1261732    .027999     4.51   0.000     .0711309    .1812156
+          2  |   .1434732   .0276543     5.19   0.000     .0891085     .197838
+             |
+       _cons |   .4212635   .1214432     3.47   0.001     .1825222    .6600049
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+       byear |        51           1          50     |
+  birth_city |       404         404           0    *|
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+. estadd local birth "$\checkmark$"
+added macro:
+              e(birth) : "$\checkmark$"
+. estadd local birth_city "$\checkmark$"
+added macro:
+         e(birth_city) : "$\checkmark$"
+. estadd local cov "$\checkmark$"
+added macro:
+                e(cov) : "$\checkmark$"
+. 
+. esttab m1 m2 m3 m4 m5 m1b m2b m3b m4b m5b, b se order(attractiveness competen
+                              (1)             (2)             (3)             (
+                          maxrank         maxrank         maxrank         maxra
+Perceived attracti~s        0.262***                                           
+                         (0.0556)                                              
+Perceived competence                        0.426***                           
+                                         (0.0641)                              
+Perceived trustwor~s                                        0.411***           
+                                                         (0.0657)              
+Perceived aggressi~s                                                       -0.2
+                                                                         (0.068
+female                      0.218***        0.233***        0.227***        0.2
+                         (0.0514)        (0.0511)        (0.0510)        (0.052
+han                       -0.0565         -0.0499         -0.0549         -0.05
+                         (0.0567)        (0.0555)        (0.0553)        (0.054
+edulevel=0                      0               0               0              
+                              (.)             (.)             (.)             (
+edulevel=1                  0.490*          0.490**         0.524**         0.5
+                          (0.193)         (0.189)         (0.190)         (0.18
+edulevel=2                  0.641**         0.640**         0.679***        0.6
+                          (0.200)         (0.196)         (0.198)         (0.19
+Constant                    0.128          -0.448          -0.467           1.6
+                          (0.266)         (0.279)         (0.320)         (0.27
+Number of obs                4071            4071            4071            40
+R-squared                   0.253           0.258           0.257           0.2
+F statistic                 12.81           18.84           17.52           14.
+Standard errors in parentheses
+* p<0.05, ** p<0.01, *** p<0.001
+. 
+end of do-file
+. </pre>

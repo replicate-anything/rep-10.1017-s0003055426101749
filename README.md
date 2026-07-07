@@ -39,7 +39,7 @@ run_replication("10.1017/S0003055426101749", "fig_2", language = "python")
 
 ## Requirements
 
-- Stata 17+ with user-written packages: `ssc install reghdfe`, `ssc install estout`
+- Stata 17+ — SSC packages (`ftools`, `reghdfe`, `estout`) are installed automatically on first run via `code/helpers/install_stata_deps.do` (called from every Stata runner). The server needs internet access once for `ssc install`.
 - R 4.5+ (see `replication.yml` dependencies)
 - Python 3.10+ with pandas, matplotlib, seaborn, scipy (for Figure 2)
 

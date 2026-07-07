@@ -1,0 +1,462 @@
+<pre class="stata-output replication-table">. 
+. do "${maindir}/code/tables/mk_tab_3.do"
+. use "${processed}/all_asperson_fulldata.dta", clear
+. do "${maindir}/code/helpers/setup_analysis.do"
+. * Shared data preparation after loading all_asperson_fulldata.dta
+. 
+. do "${maindir}/code/helpers/install_stata_deps.do"
+. * Install SSC dependencies for this study (batch / server safe).
+. * First run needs internet access. Uses reghdfe 5.x from SSC (author replicat
+. * Reghdfe 6.x from GitHub requires the separate "require" package — not used 
+. 
+. version 17
+. set more off, permanently
+(set more preference recorded)
+. cap set netmsg off
+. 
+. * Drop GitHub 6.x stack when "require" is present; reinstall SSC 5.x.
+. cap which require
+. if !_rc {
+.     di as txt "Reinstalling SSC ftools/reghdfe (replacing reghdfe 6.x / requi
+Reinstalling SSC ftools/reghdfe (replacing reghdfe 6.x / require stack)...
+.     cap ado uninstall reghdfe
+.     cap ado uninstall ftools
+. }
+. 
+. cap which ftools
+. if _rc {
+.     di as txt "Installing ftools from SSC..."
+Installing ftools from SSC...
+.     ssc install ftools, replace
+checking ftools consistency and verifying not already installed...
+installing into C:\Users\humphreys\ado\plus\...
+installation complete.
+. }
+. cap noisily ftools, compile
+(compiling lftools.mlib for Stata 17)
+(library saved in C:\Users\humphreys\ado\plus/l/lftools.mlib)
+. cap mata: mata mlib index
+. 
+. cap which reghdfe
+. if _rc {
+.     di as txt "Installing reghdfe from SSC..."
+Installing reghdfe from SSC...
+.     ssc install reghdfe, replace
+checking reghdfe consistency and verifying not already installed...
+installing into C:\Users\humphreys\ado\plus\...
+installation complete.
+. }
+. 
+. cap which estout
+. if _rc {
+.     di as txt "Installing estout from SSC..."
+.     ssc install estout, replace
+. }
+. 
+. cap which reghdfe
+. if _rc {
+.     di as err "reghdfe is not installed."
+.     di as err "Run interactively once: ssc install ftools, replace"
+.     di as err "  ftools, compile"
+.     di as err "  ssc install reghdfe, replace"
+.     di as err "  ssc install estout, replace"
+.     exit 498
+. }
+. 
+. cap which eststo
+. if _rc {
+.     di as err "eststo not found — run: ssc install estout, replace"
+.     exit 498
+. }
+. 
+end of do-file
+. 
+. encode education, gen(edu)
+. encode birth_city, gen(bcity)
+. encode nation, gen(ethnic)
+. g edulevel = 0
+. replace edulevel = 1 if education == "大学" | education == "专科" | education
+(1,740 real changes made)
+. replace edulevel = 2 if education == "硕士" | education == "博士"
+(4,457 real changes made)
+. egen maxrank = max(rank), by(name birthyear)
+. g toprank = rank == maxrank
+. g by = substr(birthyear, 1, 4)
+(39 missing values generated)
+. destring by, gen(byear)
+by: all characters numeric; byear generated as int
+(39 missing values generated)
+. generate han = (nation == "汉族")
+. tostring name, replace
+name already string; no replace
+. merge m:1 name byear birth_prov using "${rawdir}/proper.dta"
+(variable byear was int, now double to accommodate using data's values)
+    Result                      Number of obs
+    Not matched                           891
+        from master                       889  (_merge==1)
+        from using                          2  (_merge==2)
+    Matched                             5,469  (_merge==3)
+. g proper = _merge == 3
+. drop _merge
+. 
+. label var attractiveness "Perceived attractiveness"
+. label var trustworthiness "Perceived trustworthiness"
+. label var competence "Perceived competence"
+. label var aggressiveness "Perceived aggressiveness"
+. 
+. egen std_att = std(attractiveness)
+(21 missing values generated)
+. egen std_trust = std(trustworthiness)
+(21 missing values generated)
+. egen std_comp = std(competence)
+(21 missing values generated)
+. egen std_agg = std(aggressiveness)
+(21 missing values generated)
+. 
+. global cov female han i.edulevel
+. 
+end of do-file
+. 
+. global facial_traits "c.attractiveness c.competence c.trustworthiness c.aggre
+. global controls "han i.edulevel"
+. 
+. reghdfe maxrank i.female##($facial_traits) $controls if toprank == 1 & proper
+(dropped 61 singleton observations)
+(MWFE estimator converged in 7 iterations)
+HDFE Linear regression                            Number of obs   =      4,010
+Absorbing 2 HDFE groups                           F(  12,    348) =      11.01
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.2506
+                                                  Adj R-squared   =     0.1666
+                                                  Within R-sq.    =     0.0343
+Number of clusters (bcity)   =        349         Root MSE        =     0.7658
+                                (Std. err. adjusted for 349 clusters in bcity)
+             |               Robust
+     maxrank | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    1.female |  -2.043762   1.713718    -1.19   0.234     -5.41431    1.326786
+attractive~s |    .071609   .0637797     1.12   0.262    -.0538332    .1970513
+  competence |   .2893547   .0696007     4.16   0.000     .1524638    .4262457
+trustworth~s |   .2365736   .0732744     3.23   0.001     .0924572    .3806901
+aggressive~s |  -.2653884   .0714134    -3.72   0.000    -.4058446   -.1249322
+             |
+      female#|
+          c. |
+attractive~s |
+          1  |  -.2424074   .3131016    -0.77   0.439     -.858217    .3734021
+             |
+      female#|
+c.competence |
+          1  |  -.0180191   .3538749    -0.05   0.959    -.7140218    .6779836
+             |
+      female#|
+          c. |
+trustworth~s |
+          1  |   .4542845   .3285977     1.38   0.168    -.1920029    1.100572
+             |
+      female#|
+          c. |
+aggressive~s |
+          1  |   .5749049   .4644261     1.24   0.217    -.3385303     1.48834
+             |
+         han |  -.0560833   .0539818    -1.04   0.300    -.1622549    .0500883
+             |
+    edulevel |
+          1  |   .5140297   .1892476     2.72   0.007     .1418167    .8862426
+          2  |   .6622068   .1964897     3.37   0.001     .2757501    1.048664
+             |
+       _cons |  -.2476504   .3860791    -0.64   0.522    -1.006992    .5116916
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+       byear |        45           1          44     |
+  birth_city |       349         349           0    *|
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+. estimates store gender_promo
+. estadd local byearfe "Yes": gender_promo
+. estadd local bcityfe "Yes": gender_promo
+. local N_promo = e(N)
+. local r2_promo = e(r2)
+. 
+. lincom han
+ ( 1)  han = 0
+     maxrank | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0560833   .0539818    -1.04   0.300    -.1622549    .0500883
+. local b_han_p : display %6.3f r(estimate)
+. local se_han_p : display %6.3f r(se)
+. local p_han_p = r(p)
+. 
+. lincom 1.edulevel
+ ( 1)  1.edulevel = 0
+     maxrank | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   .5140297   .1892476     2.72   0.007     .1418167    .8862426
+. local b_college_p : display %6.3f r(estimate)
+. local se_college_p : display %6.3f r(se)
+. local p_college_p = r(p)
+. 
+. lincom 2.edulevel
+ ( 1)  2.edulevel = 0
+     maxrank | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   .6622068   .1964897     3.37   0.001     .2757501    1.048664
+. local b_grad_p : display %6.3f r(estimate)
+. local se_grad_p : display %6.3f r(se)
+. local p_grad_p = r(p)
+. 
+. foreach v in han_p college_p grad_p {
+  2.     local star_`v' ""
+  3.     if `p_`v'' < 0.01      local star_`v' "***"
+  4.     else if `p_`v'' < 0.05  local star_`v' "**"
+  5.     else if `p_`v'' < 0.10  local star_`v' "*"
+  6. }
+. 
+. estimates restore gender_promo
+(results gender_promo are active now)
+. nlcom (Attractiveness: _b[c.attractiveness]) ///
+Attractive~s: _b[c.attractiveness]
+  Competence: _b[c.competence]
+Trustworth~s: _b[c.trustworthiness]
+Aggressive~s: _b[c.aggressiveness]
+     maxrank | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+Attractive~s |    .071609   .0637797     1.12   0.262    -.0533969     .196615
+  Competence |   .2893547   .0696007     4.16   0.000     .1529399    .4257696
+Trustworth~s |   .2365736   .0732744     3.23   0.001     .0929584    .3801889
+Aggressive~s |  -.2653884   .0714134    -3.72   0.000    -.4053561   -.1254207
+. estadd scalar N = `N_promo', replace
+added scalar:
+                  e(N) =  4010
+. estadd scalar r2 = `r2_promo', replace
+added scalar:
+                 e(r2) =  .25057804
+. estadd local byearfe  "Yes"
+added macro:
+            e(byearfe) : "Yes"
+. estadd local bcityfe  "Yes"
+added macro:
+            e(bcityfe) : "Yes"
+. estadd local ctrl_han     "`b_han_p'`star_han_p' (`se_han_p')"
+added macro:
+           e(ctrl_han) : "-0.056 ( 0.054)"
+. estadd local ctrl_college "`b_college_p'`star_college_p' (`se_college_p')"
+added macro:
+       e(ctrl_college) : " 0.514*** ( 0.189)"
+. estadd local ctrl_grad    "`b_grad_p'`star_grad_p' (`se_grad_p')"
+added macro:
+          e(ctrl_grad) : " 0.662*** ( 0.196)"
+. eststo promo_male
+. 
+. estimates restore gender_promo
+(results gender_promo are active now)
+. nlcom (Attractiveness: _b[c.attractiveness] + _b[1.female#c.attractiveness]) 
+Attractive~s: _b[c.attractiveness] + _b[1.female#c.attractiveness]
+  Competence: _b[c.competence] + _b[1.female#c.competence]
+Trustworth~s: _b[c.trustworthiness] + _b[1.female#c.trustworthiness]
+Aggressive~s: _b[c.aggressiveness] + _b[1.female#c.aggressiveness]
+     maxrank | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+Attractive~s |  -.1707984   .2967377    -0.58   0.565    -.7523936    .4107968
+  Competence |   .2713356   .3474092     0.78   0.435    -.4095738    .9522451
+Trustworth~s |   .6908581    .318357     2.17   0.030     .0668899    1.314826
+Aggressive~s |   .3095165    .445084     0.70   0.487     -.562832    1.181865
+. estadd scalar N = `N_promo', replace
+added scalar:
+                  e(N) =  4010
+. estadd scalar r2 = `r2_promo', replace
+added scalar:
+                 e(r2) =  .25057804
+. estadd local byearfe  "Yes"
+added macro:
+            e(byearfe) : "Yes"
+. estadd local bcityfe  "Yes"
+added macro:
+            e(bcityfe) : "Yes"
+. eststo promo_female
+. 
+. reghdfe purge i.female##($facial_traits) $controls if toprank == 1 & proper =
+(dropped 61 singleton observations)
+(MWFE estimator converged in 7 iterations)
+HDFE Linear regression                            Number of obs   =      4,010
+Absorbing 2 HDFE groups                           F(  12,    348) =       7.97
+Statistics robust to heteroskedasticity           Prob > F        =     0.0000
+                                                  R-squared       =     0.1214
+                                                  Adj R-squared   =     0.0229
+                                                  Within R-sq.    =     0.0105
+Number of clusters (bcity)   =        349         Root MSE        =     0.2854
+                                (Std. err. adjusted for 349 clusters in bcity)
+             |               Robust
+       purge | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+    1.female |    .832399   .5427108     1.53   0.126     -.235007    1.899805
+attractive~s |  -.0197132    .029313    -0.67   0.502    -.0773661    .0379398
+  competence |  -.0628192    .025498    -2.46   0.014    -.1129688   -.0126697
+trustworth~s |  -.0539836   .0300114    -1.80   0.073    -.1130103     .005043
+aggressive~s |  -.0025633   .0278161    -0.09   0.927    -.0572722    .0521456
+             |
+      female#|
+          c. |
+attractive~s |
+          1  |  -.1009629   .0872025    -1.16   0.248    -.2724731    .0705473
+             |
+      female#|
+c.competence |
+          1  |  -.0801999   .0932654    -0.86   0.390    -.2636347    .1032348
+             |
+      female#|
+          c. |
+trustworth~s |
+          1  |   -.109966   .0869764    -1.26   0.207    -.2810314    .0610995
+             |
+      female#|
+          c. |
+aggressive~s |
+          1  |   .0030665   .1168278     0.03   0.979    -.2267109    .2328438
+             |
+         han |  -.0101819   .0204724    -0.50   0.619    -.0504471    .0300834
+             |
+    edulevel |
+          1  |   .1261121   .0277796     4.54   0.000      .071475    .1807492
+          2  |   .1439346   .0275008     5.23   0.000     .0898459    .1980234
+             |
+       _cons |   .3863195    .127437     3.03   0.003      .135676    .6369631
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+       byear |        45           1          44     |
+  birth_city |       349         349           0    *|
+-----------------------------------------------------+
+* = FE nested within cluster; treated as redundant for DoF computation
+. estimates store gender_purge
+. estadd local byearfe "Yes": gender_purge
+. estadd local bcityfe "Yes": gender_purge
+. local N_purge = e(N)
+. local r2_purge = e(r2)
+. 
+. lincom han
+ ( 1)  han = 0
+       purge | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |  -.0101819   .0204724    -0.50   0.619    -.0504471    .0300834
+. local b_han_g : display %6.3f r(estimate)
+. local se_han_g : display %6.3f r(se)
+. local p_han_g = r(p)
+. 
+. lincom 1.edulevel
+ ( 1)  1.edulevel = 0
+       purge | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   .1261121   .0277796     4.54   0.000      .071475    .1807492
+. local b_college_g : display %6.3f r(estimate)
+. local se_college_g : display %6.3f r(se)
+. local p_college_g = r(p)
+. 
+. lincom 2.edulevel
+ ( 1)  2.edulevel = 0
+       purge | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+         (1) |   .1439346   .0275008     5.23   0.000     .0898459    .1980234
+. local b_grad_g : display %6.3f r(estimate)
+. local se_grad_g : display %6.3f r(se)
+. local p_grad_g = r(p)
+. 
+. foreach v in han_g college_g grad_g {
+  2.     local star_`v' ""
+  3.     if `p_`v'' < 0.01      local star_`v' "***"
+  4.     else if `p_`v'' < 0.05  local star_`v' "**"
+  5.     else if `p_`v'' < 0.10  local star_`v' "*"
+  6. }
+. 
+. estimates restore gender_purge
+(results gender_purge are active now)
+. nlcom (Attractiveness: _b[c.attractiveness]) ///
+Attractive~s: _b[c.attractiveness]
+  Competence: _b[c.competence]
+Trustworth~s: _b[c.trustworthiness]
+Aggressive~s: _b[c.aggressiveness]
+       purge | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+Attractive~s |  -.0197132    .029313    -0.67   0.501    -.0771656    .0377393
+  Competence |  -.0628192    .025498    -2.46   0.014    -.1127944   -.0128441
+Trustworth~s |  -.0539836   .0300114    -1.80   0.072     -.112805    .0048377
+Aggressive~s |  -.0025633   .0278161    -0.09   0.927    -.0570819    .0519553
+. estadd scalar N = `N_purge', replace
+added scalar:
+                  e(N) =  4010
+. estadd scalar r2 = `r2_purge', replace
+added scalar:
+                 e(r2) =  .12136436
+. estadd local byearfe  "Yes"
+added macro:
+            e(byearfe) : "Yes"
+. estadd local bcityfe  "Yes"
+added macro:
+            e(bcityfe) : "Yes"
+. estadd local ctrl_han     "`b_han_g'`star_han_g' (`se_han_g')"
+added macro:
+           e(ctrl_han) : "-0.010 ( 0.020)"
+. estadd local ctrl_college "`b_college_g'`star_college_g' (`se_college_g')"
+added macro:
+       e(ctrl_college) : " 0.126*** ( 0.028)"
+. estadd local ctrl_grad    "`b_grad_g'`star_grad_g' (`se_grad_g')"
+added macro:
+          e(ctrl_grad) : " 0.144*** ( 0.028)"
+. eststo purge_male
+. 
+. estimates restore gender_purge
+(results gender_purge are active now)
+. nlcom (Attractiveness: _b[c.attractiveness] + _b[1.female#c.attractiveness]) 
+Attractive~s: _b[c.attractiveness] + _b[1.female#c.attractiveness]
+  Competence: _b[c.competence] + _b[1.female#c.competence]
+Trustworth~s: _b[c.trustworthiness] + _b[1.female#c.trustworthiness]
+Aggressive~s: _b[c.aggressiveness] + _b[1.female#c.aggressiveness]
+       purge | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+Attractive~s |  -.1206761   .0805753    -1.50   0.134    -.2786007    .0372485
+  Competence |  -.1430192    .090195    -1.59   0.113     -.319798    .0337597
+Trustworth~s |  -.1639496   .0797499    -2.06   0.040    -.3202565   -.0076427
+Aggressive~s |   .0005032   .1112762     0.00   0.996    -.2175942    .2186006
+. estadd scalar N = `N_purge', replace
+added scalar:
+                  e(N) =  4010
+. estadd scalar r2 = `r2_purge', replace
+added scalar:
+                 e(r2) =  .12136436
+. estadd local byearfe  "Yes"
+added macro:
+            e(byearfe) : "Yes"
+. estadd local bcityfe  "Yes"
+added macro:
+            e(bcityfe) : "Yes"
+. eststo purge_female
+. 
+. esttab promo_male promo_female purge_male purge_female, ///
+Influence of Facial Features by Gender
+                      (1)            (2)            (3)            (4)  
+             Promotion:~e   Promotion:~e    Purge: Male   Purge: Fem~e  
+Attractive~s        0.072         -0.171         -0.020         -0.121  
+                  (0.064)        (0.297)        (0.029)        (0.081)  
+Competence          0.289**        0.271         -0.063*        -0.143  
+                  (0.070)        (0.347)        (0.025)        (0.090)  
+Trustworth~s        0.237**        0.691*        -0.054+        -0.164* 
+                  (0.073)        (0.318)        (0.030)        (0.080)  
+Aggressive~s       -0.265**        0.310         -0.003          0.001  
+                  (0.071)        (0.445)        (0.028)        (0.111)  
+Han ethnic~y -0.056 ( 0.054)                  -0.010 ( 0.020)                 
+College de~e  0.514*** ( 0.189)                   0.126*** ( 0.028)            
+>      
+Graduate d~e  0.662*** ( 0.196)                   0.144*** ( 0.028)            
+>      
+Observations         4010           4010           4010           4010  
+R-squared           0.251          0.251          0.121          0.121  
+Birth Year~E          Yes            Yes            Yes            Yes  
+Birth City~E          Yes            Yes            Yes            Yes  
+Standard errors in parentheses
++ p<0.1, * p<0.05, ** p<0.01
+. 
+end of do-file
+. </pre>

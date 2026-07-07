@@ -4,21 +4,7 @@
 version 17
 set more off, permanently
 
-local root "`c(pwd)'"
-local root : subinstr local root "\" "/", all
-while !fileexists("`root'/replication.yml") & "`root'" != "" {
-    local parent = substr("`root'", 1, strrpos("`root'", "/") - 1)
-    if "`parent'" == "`root'" | !nzchar("`parent'") continue, break
-    local root "`parent'"
-}
-global maindir "`root'"
-global rawdir "${maindir}/data/raw"
-global processed "${maindir}/data/processed"
-cap mkdir "${maindir}/data"
-cap mkdir "${rawdir}"
-cap mkdir "${processed}"
-
-do "${maindir}/code/helpers/install_stata_deps.do"
+do "code/helpers/init_study_paths.do"
 
 clear all
 use "${rawdir}/all_asperson_original.dta", clear
