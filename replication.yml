@@ -49,9 +49,7 @@ replications:
     format: code/helpers/format_stata.R
     output: artifacts/staging/tab_1_stata.log
     artifact: artifacts/tab_1.html
-    dependencies:
-      - reghdfe
-      - estout
+    # Stata SSC packages (install in Stata): reghdfe, estout
 
   - id: tab_2
     group: tab_2
