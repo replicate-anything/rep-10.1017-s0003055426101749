@@ -1,6 +1,9 @@
 .Rproj.user/
 *.log
 artifacts/staging/
-data/processed/*.dta
-data/raw/*.dta
-!data/raw/README.md
+
+# Data files are committed with the study so live replication works from a
+# fresh clone (this is why the app can "Run" a study). Only exclude inputs
+# that are too large for git (roughly >50 MB): keep those out of the repo,
+# stage them under the registry data area, and deploy them to the server
+# manually.
