@@ -24,7 +24,17 @@ trait_labels = {
 }
 plot_order = ["attractiveness", "competence", "trustworthiness", "aggressiveness"]
 
-plt.style.use("seaborn-v0_8-whitegrid")
+# matplotlib 3.6+ ships seaborn styles as seaborn-v0_8-*; older releases use
+# seaborn-whitegrid. Fall back gracefully on servers with legacy matplotlib.
+for _style in ("seaborn-v0_8-whitegrid", "seaborn-whitegrid", "ggplot"):
+    try:
+        plt.style.use(_style)
+        break
+    except OSError:
+        pass
+else:
+    sns.set_style("whitegrid")
+
 fig, axes = plt.subplots(2, 2, figsize=(10, 10))
 axes = axes.flatten()
 
