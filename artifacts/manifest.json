@@ -1,47 +1,17 @@
 {
-  "generated_at": "2026-07-07T16:05:27Z",
+  "generated_at": "2026-07-08T05:50:41Z",
   "folder": "10.1017_s0003055426101749",
   "doi": "10.1017/s0003055426101749",
   "prep": {
     "construct_analysis_dataset": {
       "status": "cached",
       "output": "data/processed/all_asperson_fulldata.dta"
-    },
-    "run_random_forest": {
-      "status": "cached",
-      "output": "data/raw/promotion_results.csv"
     }
   },
   "replications": {
-    "tab_1": {
-      "status": "ok",
-      "artifact": "artifacts/tab_1.html",
-      "format": "html"
-    },
     "tab_2": {
-      "status": "ok",
-      "artifact": "artifacts/tab_2.html",
-      "format": "html"
-    },
-    "tab_3": {
-      "status": "ok",
-      "artifact": "artifacts/tab_3.html",
-      "format": "html"
-    },
-    "fig_2": {
-      "status": "ok",
-      "artifact": "artifacts/fig_2.png",
-      "format": "ggplot"
-    },
-    "fig_4": {
-      "status": "ok",
-      "artifact": "artifacts/fig_4.png",
-      "format": "ggplot"
-    },
-    "fig_5": {
-      "status": "ok",
-      "artifact": "artifacts/fig_5.png",
-      "format": "ggplot"
+      "status": "error",
+      "message": "values must be length 0,\n but FUN(X[[1]]) result is length 1"
     }
   },
   "study_repo": "replicate-anything/rep-10.1017-s0003055426101749",

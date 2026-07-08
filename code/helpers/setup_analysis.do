@@ -1,6 +1,5 @@
 * Shared data preparation after loading all_asperson_fulldata.dta
-
-do "${maindir}/code/helpers/install_stata_deps.do"
+* (SSC deps installed by init_study_paths.do)
 
 encode education, gen(edu)
 encode birth_city, gen(bcity)

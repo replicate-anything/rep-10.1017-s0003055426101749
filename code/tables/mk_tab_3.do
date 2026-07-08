@@ -112,10 +112,13 @@ estadd local byearfe  "Yes"
 estadd local bcityfe  "Yes"
 eststo purge_female
 
-esttab promo_male promo_female purge_male purge_female, ///
+* Publication table (author: esttab ... using 3_out_interaction_bygender.txt)
+esttab promo_male promo_female purge_male purge_female using "${result}/tab_3_table.html", ///
+    html replace ///
     b(3) se(3) star(+ 0.1 * 0.05 ** 0.01) ///
     mtitles("Promotion: Male" "Promotion: Female" "Purge: Male" "Purge: Female") ///
     title("Influence of Facial Features by Gender") ///
     stats(ctrl_han ctrl_college ctrl_grad N r2 byearfe bcityfe, ///
         labels("Han ethnicity" "College degree" "Graduate degree" ///
-               "Observations" "R-squared" "Birth Year FE" "Birth City FE") fmt(0 0 0 0 3 0 0))
+               "Observations" "R-squared" "Birth Year FE" "Birth City FE") fmt(0 0 0 0 3 0 0)) ///
+    note("Effects calculated from interaction models. Controls constant across gender subgroups within each DV.")

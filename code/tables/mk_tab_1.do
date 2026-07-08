@@ -53,4 +53,13 @@ estadd local birth "$\checkmark$"
 estadd local birth_city "$\checkmark$"
 estadd local cov "$\checkmark$"
 
-esttab m1 m2 m3 m4 m5 m1b m2b m3b m4b m5b, b se order(attractiveness competence trustworthiness aggressiveness female han *edulevel) label replace stats(N r2 F, labels("Number of obs" "R-squared" "F statistic"))
+* Publication table (author: esttab ... using 1_out_main.txt)
+esttab m1 m2 m3 m4 m5 m1b m2b m3b m4b m5b using "${result}/tab_1_table.html", ///
+    html replace ///
+    nonote nobaselevels nocons ///
+    b(3) se(3) star(* 0.05 ** 0.01) ///
+    order(attractiveness competence trustworthiness aggressiveness female han *edulevel) ///
+    label ///
+    nomtitles ///
+    mgroups("DV: Maximum Rank" "DV: Purge", pattern(1 0 0 0 0 1 0 0 0 0)) ///
+    stats(birth birth_city r2 N, labels("Birth year FE" "Birth city FE" "R-squared" "Observations") fmt(0 0 2 0))

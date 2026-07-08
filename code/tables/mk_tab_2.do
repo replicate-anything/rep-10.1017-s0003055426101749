@@ -119,9 +119,13 @@ estadd local byearfe  "Yes"
 estadd local bcityfe  "Yes"
 eststo step3
 
-esttab step1 step2 step3, b(3) se(3) star(+ 0.1 * 0.05 ** 0.01) ///
+* Publication table (author: esttab ... using 2_out_interaction_bystep.txt)
+esttab step1 step2 step3 using "${result}/tab_2_table.html", ///
+    html replace ///
+    b(3) se(3) star(+ 0.1 * 0.05 ** 0.01) ///
     mtitles("Step 1: Pref-Deputy" "Step 2: Deputy-Full" "Step 3: Full-National") ///
     title("Influence of Facial Features by Promotion Steps") ///
     stats(ctrl_female ctrl_han ctrl_college ctrl_grad N r2 byearfe bcityfe, ///
         labels("Female" "Han ethnicity" "College degree" "Graduate degree" ///
-               "Observations" "R-squared" "Birth Year FE" "Birth City FE") fmt(0 0 0 0 0 3 0 0))
+               "Observations" "R-squared" "Birth Year FE" "Birth City FE") fmt(0 0 0 0 0 3 0 0)) ///
+    note("Controls are from the same pooled interaction model and constant across steps.")
