@@ -6,12 +6,29 @@ version 17
 set more off, permanently
 cap set netmsg off
 
-* Drop GitHub 6.x stack when "require" is present; reinstall SSC 5.x.
+* Drop GitHub 6.x stack or broken partial install; reinstall SSC 5.x.
+local refresh 0
+
 cap which require
-if !_rc {
-    di as txt "Reinstalling SSC ftools/reghdfe (replacing reghdfe 6.x / require stack)..."
+if !_rc local refresh 1
+
+if !`refresh' {
+    cap which reghdfe
+    if !_rc {
+        cap noi reghdfe
+        if _rc == 9 local refresh 1
+        if !`refresh' {
+            cap help reghdfe
+            if _rc local refresh 1
+        }
+    }
+}
+
+if `refresh' {
+    di as txt "Refreshing SSC ftools/reghdfe stack (replacing GitHub / broken install)..."
     cap ado uninstall reghdfe
     cap ado uninstall ftools
+    cap ado uninstall require
 }
 
 cap which ftools
