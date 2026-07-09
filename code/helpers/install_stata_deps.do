@@ -46,18 +46,18 @@ if _rc {
 
 * reghdfe being *findable* is not enough: a stale ftools makes reghdfe.ado
 * fail to load at runtime (r(9), "install from Github ... ftools, compile").
-* Force the ado to load here; if it fails, refresh the whole stack from SSC,
-* recompile ftools, and discard cached programs so the fresh copies load.
-cap reghdfe
-if _rc != 0 & _rc != 100 {
+* Use -help- to force the ado to parse/load. Do not run bare -reghdfe-: with no
+* data that returns r(301) (usage/last-estimates) even when the package is fine.
+cap help reghdfe
+if _rc {
     di as txt "reghdfe failed to load (rc=`=_rc'); refreshing ftools + reghdfe stack..."
     ssc install ftools, replace
     cap noisily ftools, compile
     cap mata: mata mlib index
     ssc install reghdfe, replace
     cap discard
-    cap reghdfe
-    if _rc != 0 & _rc != 100 {
+    cap help reghdfe
+    if _rc {
         di as err "reghdfe still fails to load after refresh (rc=`=_rc')."
         di as err "Run interactively once:"
         di as err "  ssc install ftools, replace"
