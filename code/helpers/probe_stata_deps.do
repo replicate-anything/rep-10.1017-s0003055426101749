@@ -1,5 +1,5 @@
 * Quick check that this study's Stata SSC stack is present (no network install).
-* Used by replicateEverything before running install_stata_deps.do.
+* Used by replicateEverything to verify Stata SSC packages before live Run (probe only).
 * Exit 0 = satisfied; non-zero = install script should run.
 
 version 17
