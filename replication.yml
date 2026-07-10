@@ -26,11 +26,6 @@ python_dependencies:
   - jupyter
   - nbconvert
 
-stata_dependencies:
-  - code/helpers/install_stata_deps.do
-
-stata_deps_probe: code/helpers/probe_stata_deps.do
-
 stata_packages:
   - ftools
   - reghdfe
