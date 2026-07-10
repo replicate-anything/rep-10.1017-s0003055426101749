@@ -1,6 +1,6 @@
 * Locate study root and set path globals. Call at the top of every Stata runner.
-* Dependency install is NOT run here — maintainers run install_stata_deps.do once,
-* or replicateEverything probes via stata_deps_probe before live Run.
+* SSC packages: declare stata_packages: in replication.yml; maintainers run
+* install_study_dependencies(doi) once. Live Run probes only.
 
 version 17
 set more off, permanently

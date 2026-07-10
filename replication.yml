@@ -30,6 +30,7 @@ stata_packages:
   - ftools
   - reghdfe
   - estout
+  - require
 
 prep:
   - id: construct_analysis_dataset

@@ -39,7 +39,7 @@ run_replication("10.1017/S0003055426101749", "fig_2", language = "python")
 
 ## Requirements
 
-- Stata 17+ with SSC packages listed under `stata_packages:` in `replication.yml` (`ftools`, `reghdfe`, `estout`). Maintainers: `install_study_dependencies("10.1017/S0003055426101749")` once; live Run probes only.
+- Stata **17+** for live Run (scripts use `version 17`). Authors replicated on **Stata 18.0** (macOS); no Stata 18–only syntax in the refactored code. SSC packages: `stata_packages:` in `replication.yml` (`ftools`, `reghdfe`, `estout`). Maintainers: `install_study_dependencies("10.1017/S0003055426101749")` once.
 - R 4.5+ (see `replication.yml` dependencies)
 - Python 3.10+ (see `python_dependencies` in `replication.yml`)
 
