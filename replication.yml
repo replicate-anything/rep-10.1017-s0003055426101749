@@ -79,6 +79,7 @@ replications:
       - construct_analysis_dataset
     data: data/processed/all_asperson_fulldata.dta
     code: code/tables/tab_1.do
+    stata_source: code/tables/mk_tab_1.do
     format: code/helpers/format_stata.R
     output: artifacts/staging/tab_1_stata.log
     artifact: artifacts/tab_1.html
@@ -93,6 +94,7 @@ replications:
       - construct_analysis_dataset
     data: data/processed/all_asperson_fulldata.dta
     code: code/tables/tab_2.do
+    stata_source: code/tables/mk_tab_2.do
     format: code/helpers/format_stata.R
     output: artifacts/staging/tab_2_stata.log
     artifact: artifacts/tab_2.html
@@ -107,6 +109,7 @@ replications:
       - construct_analysis_dataset
     data: data/processed/all_asperson_fulldata.dta
     code: code/tables/tab_3.do
+    stata_source: code/tables/mk_tab_3.do
     format: code/helpers/format_stata.R
     output: artifacts/staging/tab_3_stata.log
     artifact: artifacts/tab_3.html
