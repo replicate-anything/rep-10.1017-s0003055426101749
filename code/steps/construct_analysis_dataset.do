@@ -1,5 +1,5 @@
 * Construct main analysis dataset (merge CPED biographical variables)
-* Output: data/processed/all_asperson_fulldata.dta
+* Output: outputs/construct_analysis_dataset/all_asperson_fulldata.dta
 
 version 17
 set more off, permanently

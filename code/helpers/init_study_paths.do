@@ -15,17 +15,17 @@ while !fileexists("`root'/replication.yml") & "`root'" != "" {
 
 global maindir "`root'"
 global rawdir "${maindir}/data/raw"
-global processed "${maindir}/data/processed"
+global processed "${maindir}/outputs/construct_analysis_dataset"
 
 if "${REPLICATE_STATA_RESULT}" != "" {
     global result "${REPLICATE_STATA_RESULT}"
 }
 else {
-    global result "${maindir}/artifacts/staging"
+    global result "${maindir}/outputs/staging"
 }
 
 cap mkdir "${maindir}/data"
 cap mkdir "${rawdir}"
 cap mkdir "${processed}"
-cap mkdir "${maindir}/artifacts"
+cap mkdir "${maindir}/outputs"
 cap mkdir "${result}"

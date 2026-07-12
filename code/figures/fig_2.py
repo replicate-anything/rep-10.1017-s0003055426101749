@@ -10,7 +10,7 @@ from scipy.stats import pearsonr
 
 root = Path(os.environ.get("REPLICATE_STUDY_ROOT", Path(__file__).resolve().parents[2]))
 raw = root / "data" / "raw"
-out = os.environ.get("REPLICATE_PYTHON_OUTPUT", str(root / "artifacts" / "fig_2.png"))
+out = os.environ.get("REPLICATE_PYTHON_OUTPUT", str(root / "outputs" / "fig_2.png"))
 Path(out).parent.mkdir(parents=True, exist_ok=True)
 
 merged_all = pd.read_csv(raw / "10fold_training_results.csv")
