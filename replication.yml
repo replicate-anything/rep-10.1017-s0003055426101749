@@ -40,7 +40,7 @@ stata_packages:
   - require
 
 steps:
-  - id: construct_analysis_dataset
+  - id: analysis_data
     type: transform
     label: Analysis dataset
     description: Merged person-rank panel (all_asperson_fulldata.dta)
@@ -49,21 +49,21 @@ steps:
       - data/raw/all_asperson_original.dta
       - data/raw/CPED_2022.dta
     outputs:
-      - outputs/construct_analysis_dataset/all_asperson_fulldata.dta
+      - outputs/analysis_data.dta
     engine: stata
-    code: code/steps/construct_analysis_dataset.do
+    code: code/steps/analysis_data.do
 
   - id: run_random_forest
     type: transform
     label: Feature importance scores
     description: Random-forest promotion and purge results (CSV)
     parents:
-      - construct_analysis_dataset
+      - analysis_data
     inputs:
-      - outputs/construct_analysis_dataset/all_asperson_fulldata.dta
+      - outputs/analysis_data.dta
     outputs:
-      - outputs/run_random_forest/promotion_results.csv
-      - outputs/run_random_forest/purge_results.csv
+      - outputs/run_random_forest_promotion.csv
+      - outputs/run_random_forest_purge.csv
     engine: python
     code: code/steps/run_random_forest.ipynb
     dependencies:
@@ -80,11 +80,11 @@ steps:
     label: Table 1
     description: Baseline results — promotion and purge
     parents:
-      - construct_analysis_dataset
+      - analysis_data
     engine: stata
     inputs:
-      - outputs/construct_analysis_dataset/all_asperson_fulldata.dta
-    data: outputs/construct_analysis_dataset/all_asperson_fulldata.dta
+      - outputs/analysis_data.dta
+    data: outputs/analysis_data.dta
     code: code/tables/tab_1.do
     stata_source: code/tables/mk_tab_1.do
     outputs:
@@ -104,9 +104,9 @@ steps:
     label: Table 2
     description: Influence of facial features by promotion steps
     parents:
-      - construct_analysis_dataset
+      - analysis_data
     engine: stata
-    data: outputs/construct_analysis_dataset/all_asperson_fulldata.dta
+    data: outputs/analysis_data.dta
     code: code/tables/tab_2.do
     stata_source: code/tables/mk_tab_2.do
     outputs:
@@ -126,9 +126,9 @@ steps:
     label: Table 3
     description: Gender-specific marginal effects (pooled interaction model)
     parents:
-      - construct_analysis_dataset
+      - analysis_data
     engine: stata
-    data: outputs/construct_analysis_dataset/all_asperson_fulldata.dta
+    data: outputs/analysis_data.dta
     code: code/tables/tab_3.do
     stata_source: code/tables/mk_tab_3.do
     outputs:
@@ -172,11 +172,11 @@ steps:
       - run_random_forest
     engine: r
     inputs:
-      - outputs/run_random_forest/promotion_results.csv
-      - outputs/run_random_forest/purge_results.csv
+      - outputs/run_random_forest_promotion.csv
+      - outputs/run_random_forest_purge.csv
     data:
-      - outputs/run_random_forest/promotion_results.csv
-      - outputs/run_random_forest/purge_results.csv
+      - outputs/run_random_forest_promotion.csv
+      - outputs/run_random_forest_purge.csv
     code: code/figures/fig_4.R
     format: format_fig_4
     outputs:

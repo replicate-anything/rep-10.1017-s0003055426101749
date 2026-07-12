@@ -1,4 +1,4 @@
-use "${processed}/all_asperson_fulldata.dta", clear
+use "${processed}/analysis_data.dta", clear
 do "${maindir}/code/helpers/setup_analysis.do"
 save "${result}/original_data.dta", replace
 

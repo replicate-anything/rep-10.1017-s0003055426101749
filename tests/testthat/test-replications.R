@@ -59,7 +59,7 @@ test_that("replication.yml lists main-text tables and figures", {
   with_study_options(ctx, {
     reps <- replicateEverything::list_replications(DOI, folder = FOLDER)
     ids <- vapply(reps, function(x) x$id, character(1))
-    testthat::expect_true("construct_analysis_dataset" %in% ids)
+    testthat::expect_true("analysis_data" %in% ids)
     testthat::expect_true(all(c("tab_1", "tab_2", "tab_3") %in% ids))
     testthat::expect_true(all(c("fig_2", "fig_4", "fig_5") %in% ids))
   })

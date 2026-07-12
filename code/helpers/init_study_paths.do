@@ -15,7 +15,7 @@ while !fileexists("`root'/replication.yml") & "`root'" != "" {
 
 global maindir "`root'"
 global rawdir "${maindir}/data/raw"
-global processed "${maindir}/outputs/construct_analysis_dataset"
+global processed "${maindir}/outputs"
 
 if "${REPLICATE_STATA_RESULT}" != "" {
     global result "${REPLICATE_STATA_RESULT}"

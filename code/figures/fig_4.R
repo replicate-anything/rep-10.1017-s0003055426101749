@@ -4,11 +4,11 @@
 make_fig_4 <- function(data = NULL) {
   root <- Sys.getenv("REPLICATE_STUDY_ROOT", unset = ".")
   if (!nzchar(root)) root <- "."
-  rf_dir <- file.path(root, "outputs", "run_random_forest")
+  out_dir <- file.path(root, "outputs")
 
-  dpr <- readr::read_csv(file.path(rf_dir, "promotion_results.csv"), show_col_types = FALSE) |>
+  dpr <- readr::read_csv(file.path(out_dir, "run_random_forest_promotion.csv"), show_col_types = FALSE) |>
     dplyr::mutate(lab = "Promotion")
-  dpu <- readr::read_csv(file.path(rf_dir, "purge_results.csv"), show_col_types = FALSE) |>
+  dpu <- readr::read_csv(file.path(out_dir, "run_random_forest_purge.csv"), show_col_types = FALSE) |>
     dplyr::mutate(lab = "Purge")
 
   dc <- dplyr::bind_rows(dpr, dpu) |>

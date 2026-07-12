@@ -1,5 +1,5 @@
 * Construct main analysis dataset (merge CPED biographical variables)
-* Output: outputs/construct_analysis_dataset/all_asperson_fulldata.dta
+* Output: outputs/analysis_data.dta
 
 version 17
 set more off, permanently
@@ -31,4 +31,4 @@ order name rank birthyear begin female education edu_year nation ///
       similarity_xjp_all similarity_xjp_hs ///
       similarity_jzm_all similarity_jzm_hs
 
-save "${processed}/all_asperson_fulldata.dta", replace
+save "${processed}/analysis_data.dta", replace
