@@ -39,27 +39,33 @@ stata_packages:
   - estout
   - require
 
-prep:
+steps:
   - id: construct_analysis_dataset
-    type: step
-    label: Construct analysis dataset
-    description: Merge CPED biographical variables into person-rank data
-    engine: stata
-    code: code/steps/construct_analysis_dataset.do
+    type: transform
+    label: Analysis dataset
+    description: Merged person-rank panel (all_asperson_fulldata.dta)
+    parents: []
     inputs:
       - data/raw/all_asperson_original.dta
       - data/raw/CPED_2022.dta
-    output: data/processed/all_asperson_fulldata.dta
+    outputs:
+      - outputs/construct_analysis_dataset/all_asperson_fulldata.dta
+    engine: stata
+    code: code/steps/construct_analysis_dataset.do
 
   - id: run_random_forest
-    type: step
-    label: Random forest feature importance
-    description: Train random forest models (produces promotion_results.csv and purge_results.csv)
+    type: transform
+    label: Feature importance scores
+    description: Random-forest promotion and purge results (CSV)
+    parents:
+      - construct_analysis_dataset
+    inputs:
+      - outputs/construct_analysis_dataset/all_asperson_fulldata.dta
+    outputs:
+      - outputs/run_random_forest/promotion_results.csv
+      - outputs/run_random_forest/purge_results.csv
     engine: python
     code: code/steps/run_random_forest.ipynb
-    inputs:
-      - data/processed/all_asperson_fulldata.dta
-    output: data/raw/promotion_results.csv
     dependencies:
       - pandas
       - numpy
@@ -68,62 +74,88 @@ prep:
       - jupyter
       - nbconvert
 
-replications:
   - id: tab_1
     group: tab_1
     type: table
     label: Table 1
     description: Baseline results — promotion and purge
-    engine: stata
-    requires:
+    parents:
       - construct_analysis_dataset
-    data: data/processed/all_asperson_fulldata.dta
+    engine: stata
+    inputs:
+      - outputs/construct_analysis_dataset/all_asperson_fulldata.dta
+    data: outputs/construct_analysis_dataset/all_asperson_fulldata.dta
     code: code/tables/tab_1.do
     stata_source: code/tables/mk_tab_1.do
-    format: code/helpers/format_stata.R
-    output: artifacts/staging/tab_1_stata.log
-    artifact: artifacts/tab_1.html
+    outputs:
+      - outputs/tab_1/tab_1_stata.log
+      - outputs/tab_1.html
+    artifact: outputs/tab_1.html
+
+  - id: tab_1_format
+    type: format
+    label: Table 1 format
+    parent: tab_1
+    code: code/helpers/format_stata.R
 
   - id: tab_2
     group: tab_2
     type: table
     label: Table 2
     description: Influence of facial features by promotion steps
-    engine: stata
-    requires:
+    parents:
       - construct_analysis_dataset
-    data: data/processed/all_asperson_fulldata.dta
+    engine: stata
+    data: outputs/construct_analysis_dataset/all_asperson_fulldata.dta
     code: code/tables/tab_2.do
     stata_source: code/tables/mk_tab_2.do
-    format: code/helpers/format_stata.R
-    output: artifacts/staging/tab_2_stata.log
-    artifact: artifacts/tab_2.html
+    outputs:
+      - outputs/tab_2/tab_2_stata.log
+      - outputs/tab_2.html
+    artifact: outputs/tab_2.html
+
+  - id: tab_2_format
+    type: format
+    label: Table 2 format
+    parent: tab_2
+    code: code/helpers/format_stata.R
 
   - id: tab_3
     group: tab_3
     type: table
     label: Table 3
     description: Gender-specific marginal effects (pooled interaction model)
-    engine: stata
-    requires:
+    parents:
       - construct_analysis_dataset
-    data: data/processed/all_asperson_fulldata.dta
+    engine: stata
+    data: outputs/construct_analysis_dataset/all_asperson_fulldata.dta
     code: code/tables/tab_3.do
     stata_source: code/tables/mk_tab_3.do
-    format: code/helpers/format_stata.R
-    output: artifacts/staging/tab_3_stata.log
-    artifact: artifacts/tab_3.html
+    outputs:
+      - outputs/tab_3/tab_3_stata.log
+      - outputs/tab_3.html
+    artifact: outputs/tab_3.html
+
+  - id: tab_3_format
+    type: format
+    label: Table 3 format
+    parent: tab_3
+    code: code/helpers/format_stata.R
 
   - id: fig_2
     group: fig_2
     type: figure
     label: Figure 2
     description: Human versus machine ratings from 10-fold cross-validation
+    parents: []
     engine: python
-    code: code/figures/fig_2.py
+    inputs:
+      - data/raw/10fold_training_results.csv
     data: data/raw/10fold_training_results.csv
-    output: artifacts/fig_2.png
-    artifact: artifacts/fig_2.png
+    code: code/figures/fig_2.py
+    outputs:
+      - outputs/fig_2.png
+    artifact: outputs/fig_2.png
     dependencies:
       - pandas
       - numpy
@@ -136,36 +168,61 @@ replications:
     type: figure
     label: Figure 4
     description: Relative importance of facial appearances in predicting promotion and purge
-    engine: r
-    requires:
+    parents:
       - run_random_forest
+    engine: r
+    inputs:
+      - outputs/run_random_forest/promotion_results.csv
+      - outputs/run_random_forest/purge_results.csv
+    data:
+      - outputs/run_random_forest/promotion_results.csv
+      - outputs/run_random_forest/purge_results.csv
     code: code/figures/fig_4.R
     format: format_fig_4
-    data:
-      - data/raw/promotion_results.csv
-      - data/raw/purge_results.csv
-    artifact: artifacts/fig_4.png
+    outputs:
+      - outputs/fig_4.png
+    artifact: outputs/fig_4.png
     dependencies:
       - ggplot2
       - dplyr
       - readr
       - tidytext
 
+  - id: fig_4_format
+    type: format
+    label: Figure 4 format
+    parent: fig_4
+    format: format_fig_4
+
   - id: fig_5
     group: fig_5
     type: figure
     label: Figure 5
     description: Conjoint experiment results on individual selection preferences
+    parents: []
     engine: r
-    code: code/figures/fig_5.R
-    format: format_fig_5
+    inputs:
+      - data/raw/attractiveness.csv
+      - data/raw/trustworthiness.csv
+      - data/raw/competence.csv
+      - data/raw/aggressiveness.csv
     data:
       - data/raw/attractiveness.csv
       - data/raw/trustworthiness.csv
       - data/raw/competence.csv
       - data/raw/aggressiveness.csv
-    artifact: artifacts/fig_5.png
+    code: code/figures/fig_5.R
+    format: format_fig_5
+    outputs:
+      - outputs/fig_5.png
+    artifact: outputs/fig_5.png
     dependencies:
       - ggplot2
       - dplyr
       - readr
+
+  - id: fig_5_format
+    type: format
+    label: Figure 5 format
+    parent: fig_5
+    format: format_fig_5
