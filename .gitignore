@@ -1,7 +1,7 @@
 .Rproj.user/
 .Rhistory
 *.log
-artifacts/staging/
+outputs/staging/
 
 # Data files are committed with the study so live replication works from a
 # fresh clone (this is why the app can "Run" a study). Only exclude inputs

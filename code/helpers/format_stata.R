@@ -2,7 +2,7 @@
 # Study repo: rep-10.1017-s0003055426101749
 #
 # Authors export publication tables with esttab ... using <file> (see DO18_main_analyses.do).
-# Runners write esttab HTML to artifacts/staging/tab_N_table.html; this formatter prefers
+# Runners write esttab HTML to outputs/staging/tab_N_table.html; this formatter prefers
 # those files over the full Stata log.
 
 `%||%` <- function(a, b) if (is.null(a)) b else a
