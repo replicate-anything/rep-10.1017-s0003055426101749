@@ -90,8 +90,6 @@ steps:
     outputs:
       - outputs/tab_1/tab_1_stata.log
       - outputs/tab_1.html
-    outputs:
-      - outputs/tab_1.html
 
   - id: tab_1_format
     type: format
@@ -112,8 +110,6 @@ steps:
     stata_source: code/tables/mk_tab_2.do
     outputs:
       - outputs/tab_2/tab_2_stata.log
-      - outputs/tab_2.html
-    outputs:
       - outputs/tab_2.html
 
   - id: tab_2_format
@@ -136,8 +132,6 @@ steps:
     outputs:
       - outputs/tab_3/tab_3_stata.log
       - outputs/tab_3.html
-    outputs:
-      - outputs/tab_3.html
 
   - id: tab_3_format
     type: format
@@ -156,8 +150,6 @@ steps:
       - data/raw/10fold_training_results.csv
     data: data/raw/10fold_training_results.csv
     code: code/figures/fig_2.py
-    outputs:
-      - outputs/fig_2.png
     outputs:
       - outputs/fig_2.png
     dependencies:
@@ -183,8 +175,6 @@ steps:
       - outputs/run_random_forest_purge.csv
     code: code/figures/fig_4.R
     format: format_fig_4
-    outputs:
-      - outputs/fig_4.png
     outputs:
       - outputs/fig_4.png
     dependencies:
@@ -218,8 +208,6 @@ steps:
       - data/raw/aggressiveness.csv
     code: code/figures/fig_5.R
     format: format_fig_5
-    outputs:
-      - outputs/fig_5.png
     outputs:
       - outputs/fig_5.png
     dependencies:
