@@ -4,6 +4,8 @@ paper:
   journal: American Political Science Review
   year: 2026
   authors: Junyan Jiang, Songpo Yang
+  # Pin folder slug to the study repo directory name
+  study_folder: rep-10.1017-s0003055426101749
   dependencies:
     - haven
     - ggplot2
