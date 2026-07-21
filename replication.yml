@@ -44,7 +44,6 @@ steps:
     type: transform
     label: Analysis dataset
     description: Merged person-rank panel (all_asperson_fulldata.dta)
-    parents: []
     inputs:
       - data/raw/all_asperson_original.dta
       - data/raw/CPED_2022.dta
@@ -93,7 +92,6 @@ steps:
 
   - id: tab_1_format
     type: format
-    label: Table 1 format
     parent: tab_1
     code: code/helpers/format_stata.R
 
@@ -114,7 +112,6 @@ steps:
 
   - id: tab_2_format
     type: format
-    label: Table 2 format
     parent: tab_2
     code: code/helpers/format_stata.R
 
@@ -135,7 +132,6 @@ steps:
 
   - id: tab_3_format
     type: format
-    label: Table 3 format
     parent: tab_3
     code: code/helpers/format_stata.R
 
@@ -144,7 +140,6 @@ steps:
     type: figure
     label: Figure 2
     description: Human versus machine ratings from 10-fold cross-validation
-    parents: []
     engine: python
     inputs:
       - data/raw/10fold_training_results.csv
@@ -185,7 +180,6 @@ steps:
 
   - id: fig_4_format
     type: format
-    label: Figure 4 format
     parent: fig_4
     format: format_fig_4
 
@@ -194,7 +188,6 @@ steps:
     type: figure
     label: Figure 5
     description: Conjoint experiment results on individual selection preferences
-    parents: []
     engine: r
     inputs:
       - data/raw/attractiveness.csv
@@ -217,6 +210,5 @@ steps:
 
   - id: fig_5_format
     type: format
-    label: Figure 5 format
     parent: fig_5
     format: format_fig_5
