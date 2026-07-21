@@ -56,8 +56,3 @@ make_fig_5 <- function(data = NULL) {
 format_fig_5 <- function(object) {
   object
 }
-
-# Run the code below to manually create outputs using functions defined above.
-if (sys.nframe() == 0L) {
-  make_fig_5()
-}
