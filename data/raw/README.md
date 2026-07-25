@@ -1,13 +1,21 @@
 # Raw data
 
-Replication scripts expect Stata `.dta` files and CSV exports in this folder (see `10.1017-S0003055426101749/README.txt` and `Codebook.pdf` in the monorepo source delivery).
+CSV exports used by figures are committed here. The two Stata inputs for
+`analysis_data` are **not** shipped in git; they are declared under
+`dataverse.files` in `replication.yml` and materialized into `data/raw/` by
+`replicateEverything::materialize_declared_data()` (also runs automatically
+before `run_replication(..., given = "nothing")`).
+
+| Local path | Dataverse (format=original) |
+|------------|-----------------------------|
+| `all_asperson_original.dta` | [file 13684082](https://dataverse.harvard.edu/api/access/datafile/13684082?format=original) |
+| `CPED_2022.dta` | [file 13684095](https://dataverse.harvard.edu/api/access/datafile/13684095?format=original) |
+
+There is no `access_data` step — fetching is yaml location wiring, not a
+transform.
 
 | File | Description |
 |------|-------------|
-| `all_asperson_original.dta` | Person-rank data before CPED merge |
-| `CPED_2022.dta` | Chinese Political Elite Database (2022) |
-| `proper.dta` | Auxiliary matching data |
-| `conjoint.dta` | Conjoint experiment (Figure 5 / Table D.1) |
-| `validation_rep.dta` | Conjoint validation sample |
-
-CSV files from the authors' archive (conjoint AMCEs, RF results, 10-fold CV output) are included. Large `.dta` files are gitignored; copy them from the journal dataverse or the delivery folder into `data/raw/` before running the Stata pipeline.
+| `all_asperson_original.dta` | Person-rank data before CPED merge (fetched) |
+| `CPED_2022.dta` | Chinese Political Elite Database (2022) (fetched) |
+| `*.csv` | Author CSV exports (committed) |

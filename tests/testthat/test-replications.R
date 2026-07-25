@@ -65,9 +65,21 @@ test_that("replication.yml lists main-text tables and figures", {
   })
 })
 
-test_that("prep step inputs are present", {
+test_that("prep step inputs are present or declared for materialize", {
   ctx <- study_test_context()
   raw <- file.path(ctx$study_root, "data", "raw")
+  yml <- yaml::read_yaml(file.path(ctx$study_root, "replication.yml"))
+  declared <- vapply(yml$dataverse$files, function(x) x$path, character(1))
+  testthat::expect_true(
+    all(c(
+      "data/raw/all_asperson_original.dta",
+      "data/raw/CPED_2022.dta"
+    ) %in% declared)
+  )
+  # Prefer on-disk if already materialized; otherwise wiring must be present
+  if (!file.exists(file.path(raw, "all_asperson_original.dta"))) {
+    testthat::skip("dta not materialized yet; run materialize_declared_data()")
+  }
   testthat::expect_true(file.exists(file.path(raw, "all_asperson_original.dta")))
   testthat::expect_true(file.exists(file.path(raw, "CPED_2022.dta")))
 })

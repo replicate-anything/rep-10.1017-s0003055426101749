@@ -22,6 +22,20 @@ collections:
 
 repo: replicate-anything/rep-10.1017-s0003055426101749
 
+dataverse:
+  doi: https://doi.org/10.7910/DVN/LCZERW
+  server: dataverse.harvard.edu
+  dataset: "10.7910/DVN/LCZERW"
+  # Location wiring (not a step): materialize_declared_data() fetches into data/
+  # Native Stata behind .tab listings; fetch via format=original URLs
+  files:
+    - path: data/raw/all_asperson_original.dta
+      url: https://dataverse.harvard.edu/api/access/datafile/13684082?format=original
+      file: all_asperson_original.tab
+    - path: data/raw/CPED_2022.dta
+      url: https://dataverse.harvard.edu/api/access/datafile/13684095?format=original
+      file: CPED_2022.tab
+
 languages:
   - stata
   - python

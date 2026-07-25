@@ -17,10 +17,11 @@ Author delivery materials (appendix scripts, codebook) live in the monorepo sour
 
 ## Pipeline
 
-1. **construct_analysis_dataset** — merge CPED biographical data → `outputs/construct_analysis_dataset/all_asperson_fulldata.dta`
-2. **run_random_forest** (optional for Figure 4) — Python notebook → `outputs/run_random_forest/*.csv`
-3. **Tables 1–3** — Stata (parent: `construct_analysis_dataset`)
-4. **Figures** — Figure 2 (Python), Figures 4–5 (R)
+1. **Declared Dataverse files** — `dataverse.files` in yaml; package materializes into `data/raw/` (no `access_data` step)
+2. **analysis_data** — merge CPED biographical data → `outputs/analysis_data.dta`
+3. **run_random_forest** (optional for Figure 4) — Python notebook → RF CSVs under `outputs/`
+4. **Tables 1–3** — Stata (parent: `analysis_data`)
+5. **Figures** — Figure 2 (Python), Figures 4–5 (R)
 
 ## Quick start
 
@@ -31,9 +32,15 @@ options(
   replicateEverything.use_sibling_packages = TRUE
 )
 
+# Fresh clone: materialize Dataverse inputs, then build analysis_data + tab_1
+materialize_declared_data("10.1017/S0003055426101749")
 run_replication("10.1017/S0003055426101749", "tab_1", given = "nothing", format = TRUE)
 run_replication("10.1017/S0003055426101749", "fig_2")
 ```
+
+Dataverse links for the two Stata inputs live under `dataverse.files` in `replication.yml`
+(fetched automatically on `given = "nothing"` / `materialize_declared_data()`;
+deposit `doi:10.7910/DVN/LCZERW`).
 
 ## Requirements
 

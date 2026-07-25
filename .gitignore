@@ -3,6 +3,10 @@
 *.log
 outputs/staging/
 
+# Materialized from dataverse.files (format=original); not committed
+data/raw/all_asperson_original.dta
+data/raw/CPED_2022.dta
+
 # Data files are committed with the study so live replication works from a
 # fresh clone (this is why the app can "Run" a study). Only exclude inputs
 # that are too large for git (roughly >50 MB): keep those out of the repo,
