@@ -1,5 +1,7 @@
-* Construct main analysis dataset (merge CPED biographical variables)
+* Construct main analysis dataset (merge CPED biographical variables + proper flag)
+* Inputs: materialized .dta files under data/raw (from dataverse.files; not a DAG step)
 * Output: outputs/analysis_data.dta
+* Caution: never put slash-star inside comments — it opens a Stata block comment.
 
 version 17
 set more off, permanently
@@ -16,6 +18,13 @@ drop _merge
 sort _sortorder
 drop _sortorder
 
+* Proper-sample flag (same logic as former setup_analysis merge)
+g by = substr(birthyear, 1, 4)
+destring by, gen(byear)
+merge m:1 name byear birth_prov using "${rawdir}/proper.dta"
+g proper = _merge == 3
+drop _merge by byear
+
 order name rank birthyear begin female education edu_year nation ///
       birth_prov birth_city purge ///
       fwhr mouth_width nose_width nose_length nwhr ///
@@ -29,6 +38,7 @@ order name rank birthyear begin female education edu_year nation ///
       trustworthiness_median facequality_median blurness_median ///
       similarity_hjt_all similarity_hjt_hs ///
       similarity_xjp_all similarity_xjp_hs ///
-      similarity_jzm_all similarity_jzm_hs
+      similarity_jzm_all similarity_jzm_hs ///
+      proper
 
 save "${processed}/analysis_data.dta", replace

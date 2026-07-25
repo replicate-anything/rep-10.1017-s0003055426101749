@@ -65,34 +65,40 @@ test_that("replication.yml lists main-text tables and figures", {
   })
 })
 
-test_that("prep step inputs are present or declared for materialize", {
+test_that("prep step inputs are declared for materialize", {
   ctx <- study_test_context()
-  raw <- file.path(ctx$study_root, "data", "raw")
   yml <- yaml::read_yaml(file.path(ctx$study_root, "replication.yml"))
   declared <- vapply(yml$dataverse$files, function(x) x$path, character(1))
   testthat::expect_true(
     all(c(
       "data/raw/all_asperson_original.dta",
-      "data/raw/CPED_2022.dta"
+      "data/raw/CPED_2022.dta",
+      "data/raw/proper.dta"
     ) %in% declared)
   )
-  # Prefer on-disk if already materialized; otherwise wiring must be present
-  if (!file.exists(file.path(raw, "all_asperson_original.dta"))) {
-    testthat::skip("dta not materialized yet; run materialize_declared_data()")
-  }
-  testthat::expect_true(file.exists(file.path(raw, "all_asperson_original.dta")))
-  testthat::expect_true(file.exists(file.path(raw, "CPED_2022.dta")))
 })
 
-test_that("fig_5 make function returns a ggplot", {
+test_that("fig_5 inputs are declared (materialize before live run)", {
+  ctx <- study_test_context()
+  yml <- yaml::read_yaml(file.path(ctx$study_root, "replication.yml"))
+  declared <- vapply(yml$dataverse$files, function(x) x$path, character(1))
+  testthat::expect_true(
+    all(c(
+      "data/raw/attractiveness.csv",
+      "data/raw/trustworthiness.csv",
+      "data/raw/competence.csv",
+      "data/raw/aggressiveness.csv"
+    ) %in% declared)
+  )
+  raw <- file.path(ctx$study_root, "data", "raw")
+  if (!file.exists(file.path(raw, "attractiveness.csv"))) {
+    testthat::skip("figure CSVs not materialized yet; run materialize_declared_data()")
+  }
   testthat::skip_if_not_installed("ggplot2")
   testthat::skip_if_not_installed("dplyr")
   testthat::skip_if_not_installed("readr")
-
-  ctx <- study_test_context()
   fig_path <- file.path(ctx$study_root, "code", "figures", "fig_5.R")
   testthat::skip_if_not(file.exists(fig_path), "fig_5.R missing")
-
   Sys.setenv(REPLICATE_STUDY_ROOT = ctx$study_root)
   on.exit(Sys.unsetenv("REPLICATE_STUDY_ROOT"), add = TRUE)
   source(fig_path, local = TRUE)
@@ -100,10 +106,10 @@ test_that("fig_5 make function returns a ggplot", {
   testthat::expect_true(inherits(p, "ggplot"))
 })
 
-test_that("fig_2 python script exists and raw data is present", {
+test_that("fig_2 python script exists and input is declared", {
   ctx <- study_test_context()
+  yml <- yaml::read_yaml(file.path(ctx$study_root, "replication.yml"))
+  declared <- vapply(yml$dataverse$files, function(x) x$path, character(1))
   testthat::expect_true(file.exists(file.path(ctx$study_root, "code", "figures", "fig_2.py")))
-  testthat::expect_true(
-    file.exists(file.path(ctx$study_root, "data", "raw", "10fold_training_results.csv"))
-  )
+  testthat::expect_true("data/raw/10fold_training_results.csv" %in% declared)
 })

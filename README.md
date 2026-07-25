@@ -5,7 +5,7 @@ Folder-backed replication study for [replicateEverything](https://github.com/rep
 ## Layout
 
 ```
-data/raw/          # Downloaded .dta files + shipped CSVs (see data/raw/README.md)
+data/raw/          # Materialize cache only (gitignored binaries; see data/raw/README.md)
 code/steps/        # Pipeline (dataset construction, RF notebook)
 code/tables/       # Main-text tables (Stata runners + mk_tab_*.do)
 code/figures/      # Main-text figures (R / Python)
@@ -17,11 +17,11 @@ Author delivery materials (appendix scripts, codebook) live in the monorepo sour
 
 ## Pipeline
 
-1. **Declared Dataverse files** — `dataverse.files` in yaml; package materializes into `data/raw/` (no `access_data` step)
-2. **analysis_data** — merge CPED biographical data → `outputs/analysis_data.dta`
+1. **Declared Dataverse files** — Pattern A: `dataverse.files` in yaml; package materializes **surgical** file-id URLs into `data/raw/` (no `access_data` step; binaries gitignored). **Migrate toward Pattern B** (access step → `outputs/`) when convenient — Stata currently expects `${rawdir}`; thin path globals would unlock B without a full rewrite.
+2. **analysis_data** — merge CPED bios + proper flag → `outputs/analysis_data.dta`
 3. **run_random_forest** (optional for Figure 4) — Python notebook → RF CSVs under `outputs/`
-4. **Tables 1–3** — Stata (parent: `analysis_data`)
-5. **Figures** — Figure 2 (Python), Figures 4–5 (R)
+4. **Tables 1–3** — Stata from `outputs/analysis_data.dta` (parent: `analysis_data`)
+5. **Figures** — Figure 2 (Python), Figures 4–5 (R); figure CSVs also come from materialize
 
 ## Quick start
 

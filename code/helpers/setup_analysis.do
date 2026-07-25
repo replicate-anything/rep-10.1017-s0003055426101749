@@ -1,5 +1,5 @@
-* Shared data preparation after loading all_asperson_fulldata.dta
-* (SSC deps installed by init_study_paths.do)
+* Shared data preparation after loading outputs/analysis_data.dta
+* (SSC deps: stata_packages in replication.yml; proper flag already in analysis_data)
 
 encode education, gen(edu)
 encode birth_city, gen(bcity)
@@ -13,9 +13,7 @@ g by = substr(birthyear, 1, 4)
 destring by, gen(byear)
 generate han = (nation == "汉族")
 tostring name, replace
-merge m:1 name byear birth_prov using "${rawdir}/proper.dta"
-g proper = _merge == 3
-drop _merge
+* proper: built in analysis_data from materialized data/raw/proper.dta
 
 label var attractiveness "Perceived attractiveness"
 label var trustworthiness "Perceived trustworthiness"

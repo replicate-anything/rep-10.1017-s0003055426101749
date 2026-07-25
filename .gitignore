@@ -3,12 +3,10 @@
 *.log
 outputs/staging/
 
-# Materialized from dataverse.files (format=original); not committed
-data/raw/all_asperson_original.dta
-data/raw/CPED_2022.dta
+# Pattern A: data/raw is a materialize cache — only README.md is committed.
+# Declared paths live under dataverse.files in replication.yml.
+data/raw/*
+!data/raw/README.md
 
-# Data files are committed with the study so live replication works from a
-# fresh clone (this is why the app can "Run" a study). Only exclude inputs
-# that are too large for git (roughly >50 MB): keep those out of the repo,
-# stage them under the registry data area, and deploy them to the server
-# manually.
+# Legacy author dump if present
+code/original/

@@ -26,8 +26,8 @@ dataverse:
   doi: https://doi.org/10.7910/DVN/LCZERW
   server: dataverse.harvard.edu
   dataset: "10.7910/DVN/LCZERW"
-  # Location wiring (not a step): materialize_declared_data() fetches into data/
-  # Native Stata behind .tab listings; fetch via format=original URLs
+  # Location wiring (not a step): materialize_declared_data() fetches into data/raw/
+  # Native uploads behind .tab listings; fetch via format=original URLs
   files:
     - path: data/raw/all_asperson_original.dta
       url: https://dataverse.harvard.edu/api/access/datafile/13684082?format=original
@@ -35,6 +35,27 @@ dataverse:
     - path: data/raw/CPED_2022.dta
       url: https://dataverse.harvard.edu/api/access/datafile/13684095?format=original
       file: CPED_2022.tab
+    - path: data/raw/proper.dta
+      url: https://dataverse.harvard.edu/api/access/datafile/13684089?format=original
+      file: proper.tab
+    - path: data/raw/10fold_training_results.csv
+      url: https://dataverse.harvard.edu/api/access/datafile/13684074?format=original
+      file: 10fold_training_results.tab
+    - path: data/raw/attractiveness.csv
+      url: https://dataverse.harvard.edu/api/access/datafile/13684105?format=original
+      file: attractiveness.tab
+    - path: data/raw/trustworthiness.csv
+      url: https://dataverse.harvard.edu/api/access/datafile/13684086?format=original
+      file: trustworthiness.tab
+    - path: data/raw/competence.csv
+      url: https://dataverse.harvard.edu/api/access/datafile/13684076?format=original
+      file: competence.tab
+    - path: data/raw/aggressiveness.csv
+      url: https://dataverse.harvard.edu/api/access/datafile/13684101?format=original
+      file: aggressiveness.tab
+    - path: data/raw/all_asperson_gdpconn_undemean.csv
+      url: https://dataverse.harvard.edu/api/access/datafile/13684097?format=original
+      file: all_asperson_gdpconn_undemean-1.tab
 
 languages:
   - stata
@@ -59,10 +80,11 @@ steps:
   - id: analysis_data
     type: transform
     label: Analysis dataset
-    description: Merged person-rank panel (all_asperson_fulldata.dta)
+    description: Merged person-rank panel with CPED bios and proper-sample flag
     inputs:
       - data/raw/all_asperson_original.dta
       - data/raw/CPED_2022.dta
+      - data/raw/proper.dta
     outputs:
       - outputs/analysis_data.dta
     engine: stata
@@ -72,10 +94,8 @@ steps:
     type: transform
     label: Feature importance scores
     description: Random-forest promotion and purge results (CSV)
-    parents:
-      - analysis_data
     inputs:
-      - outputs/analysis_data.dta
+      - data/raw/all_asperson_gdpconn_undemean.csv
     outputs:
       - outputs/run_random_forest_promotion.csv
       - outputs/run_random_forest_purge.csv
