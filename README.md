@@ -6,7 +6,7 @@ Folder-backed replication study for [replicateEverything](https://github.com/rep
 
 ```
 data/raw/          # Materialize cache only (gitignored binaries; see data/raw/README.md)
-code/steps/        # Pipeline (dataset construction, RF notebook)
+code/steps/        # Pipeline (dataset construction, RF notebook, Dataverse access)
 code/tables/       # Main-text tables (Stata runners + mk_tab_*.do)
 code/figures/      # Main-text figures (R / Python)
 code/helpers/      # Shared setup and formatters
@@ -17,13 +17,17 @@ Author delivery materials (appendix scripts, codebook) live in the monorepo sour
 
 ## Pipeline
 
-1. **Declared Dataverse files** — Pattern A: `dataverse.files` in yaml; package materializes **surgical** file-id URLs into `data/raw/` (no `access_data` step; binaries gitignored). **Migrate toward Pattern B** (access step → `outputs/`) when convenient — Stata currently expects `${rawdir}`; thin path globals would unlock B without a full rewrite.
+1. **Declared Dataverse files** — Pattern A for Stata/RF/fig_5 roots:
+   `dataverse.files` → materialize into `data/raw/` (gitignored). **Figure 2**
+   is Pattern B: `access_fig_2_data` (`engine: dataverse`, file 13684074) →
+   baked `outputs/10fold_training_results.csv` (committed for Shiny Live Run).
 2. **analysis_data** — merge CPED bios + proper flag → `outputs/analysis_data.dta`
 3. **run_random_forest** (optional for Figure 4) — Python notebook → RF CSVs under `outputs/`
 4. **Tables 1–3** — Stata from `outputs/analysis_data.dta` (parent: `analysis_data`)
-5. **Figures** — Figure 2 (Python), Figures 4–5 (R). Figure 2’s
-   `data/raw/10fold_training_results.csv` is committed (Shiny Live Run); other
-   figure/raw inputs still come from materialize. Display uses baked `outputs/fig_*.png`.
+5. **Figures** — Figure 2 (Python; parent `access_fig_2_data`, reads
+   `outputs/10fold_training_results.csv`), Figures 4–5 (R). Display uses
+   baked `outputs/fig_*.png`. Live Run for fig_2 uses the baked parent CSV
+   (`given = "parents"`); no multi-hour retrain (authors ship precomputed scores).
 
 ## Quick start
 
@@ -40,9 +44,9 @@ run_replication("10.1017/S0003055426101749", "tab_1", given = "nothing", format 
 run_replication("10.1017/S0003055426101749", "fig_2")
 ```
 
-Dataverse links for the two Stata inputs live under `dataverse.files` in `replication.yml`
+Dataverse links for Stata/RF/fig_5 inputs live under `dataverse.files` in `replication.yml`
 (fetched automatically on `given = "nothing"` / `materialize_declared_data()`;
-deposit `doi:10.7910/DVN/LCZERW`).
+deposit `doi:10.7910/DVN/LCZERW`). Figure 2’s CSV is the Pattern B access step.
 
 ## Requirements
 

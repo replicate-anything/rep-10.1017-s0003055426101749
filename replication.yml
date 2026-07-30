@@ -29,6 +29,7 @@ dataverse:
   dataset: "10.7910/DVN/LCZERW"
   # Location wiring (not a step): materialize_declared_data() fetches into data/raw/
   # Native uploads behind .tab listings; fetch via format=original URLs
+  # fig_2 10-fold CSV is Pattern B (access_fig_2_data → outputs/), not listed here
   files:
     - path: data/raw/all_asperson_original.dta
       url: https://dataverse.harvard.edu/api/access/datafile/13684082?format=original
@@ -39,9 +40,6 @@ dataverse:
     - path: data/raw/proper.dta
       url: https://dataverse.harvard.edu/api/access/datafile/13684089?format=original
       file: proper.tab
-    - path: data/raw/10fold_training_results.csv
-      url: https://dataverse.harvard.edu/api/access/datafile/13684074?format=original
-      file: 10fold_training_results.tab
     - path: data/raw/attractiveness.csv
       url: https://dataverse.harvard.edu/api/access/datafile/13684105?format=original
       file: attractiveness.tab
@@ -110,6 +108,20 @@ steps:
       - jupyter
       - nbconvert
 
+  - id: access_fig_2_data
+    type: transform
+    label: 10-fold training results
+    description: >
+      Author-precomputed human vs machine rating scores (Dataverse file
+      13684074). No local retrain — image-level CV is upstream of the archive.
+      Baked under outputs/ so Shiny Live Run with given=parents works offline.
+    engine: dataverse
+    file_id: "13684074"
+    original: true
+    code: code/steps/access_fig_2_data.R
+    outputs:
+      - outputs/10fold_training_results.csv
+
   - id: tab_1
     group: tab_1
     type: table
@@ -177,10 +189,12 @@ steps:
     type: figure
     label: Figure 2
     description: Human versus machine ratings from 10-fold cross-validation
+    parents:
+      - access_fig_2_data
     engine: python
     inputs:
-      - data/raw/10fold_training_results.csv
-    data: data/raw/10fold_training_results.csv
+      - outputs/10fold_training_results.csv
+    data: outputs/10fold_training_results.csv
     code: code/figures/fig_2.py
     outputs:
       - outputs/fig_2.png

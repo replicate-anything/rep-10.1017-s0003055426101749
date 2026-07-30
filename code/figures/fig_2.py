@@ -1,4 +1,8 @@
-"""Figure 2 — Human vs. machine ratings (10-fold cross-validation)."""
+"""Figure 2 — Human vs. machine ratings (10-fold cross-validation).
+
+Reads the parent access sink under outputs/ (author-precomputed scores;
+no local retrain). Live Run with given=parents uses the baked CSV when present.
+"""
 import os
 from pathlib import Path
 
@@ -9,11 +13,11 @@ import seaborn as sns
 from scipy.stats import pearsonr
 
 root = Path(os.environ.get("REPLICATE_STUDY_ROOT", Path(__file__).resolve().parents[2]))
-raw = root / "data" / "raw"
+csv_path = root / "outputs" / "10fold_training_results.csv"
 out = os.environ.get("REPLICATE_PYTHON_OUTPUT", str(root / "outputs" / "fig_2.png"))
 Path(out).parent.mkdir(parents=True, exist_ok=True)
 
-merged_all = pd.read_csv(raw / "10fold_training_results.csv")
+merged_all = pd.read_csv(csv_path)
 merged_all.dropna(subset=["TrueScore", "PredictedScore"], inplace=True)
 
 trait_labels = {

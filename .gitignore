@@ -3,12 +3,11 @@
 *.log
 outputs/staging/
 
-# Pattern A: data/raw is mostly a materialize cache (gitignored binaries).
-# Exception: fig_2 input ships in git so Shiny Live Run works without Dataverse.
+# Pattern A: data/raw is a materialize cache (gitignored binaries).
+# Figure 2 uses Pattern B: baked outputs/10fold_training_results.csv (tracked).
 # Declared paths live under dataverse.files in replication.yml.
 data/raw/*
 !data/raw/README.md
-!data/raw/10fold_training_results.csv
 
 # Legacy author dump if present
 code/original/

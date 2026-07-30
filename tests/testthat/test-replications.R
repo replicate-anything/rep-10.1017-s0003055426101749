@@ -106,10 +106,25 @@ test_that("fig_5 inputs are declared (materialize before live run)", {
   testthat::expect_true(inherits(p, "ggplot"))
 })
 
-test_that("fig_2 python script exists and input is declared", {
+test_that("fig_2 reads baked outputs sink via access parent", {
   ctx <- study_test_context()
   yml <- yaml::read_yaml(file.path(ctx$study_root, "replication.yml"))
-  declared <- vapply(yml$dataverse$files, function(x) x$path, character(1))
+  fig2 <- NULL
+  for (step in yml$steps) {
+    if (identical(step$id, "fig_2")) {
+      fig2 <- step
+      break
+    }
+  }
+  testthat::expect_false(is.null(fig2))
+  testthat::expect_true("access_fig_2_data" %in% unlist(fig2$parents))
+  inputs <- unlist(fig2$inputs)
+  if (is.null(inputs) || !length(inputs)) {
+    inputs <- as.character(fig2$data)
+  }
+  testthat::expect_true("outputs/10fold_training_results.csv" %in% inputs)
   testthat::expect_true(file.exists(file.path(ctx$study_root, "code", "figures", "fig_2.py")))
-  testthat::expect_true("data/raw/10fold_training_results.csv" %in% declared)
+  testthat::expect_true(
+    file.exists(file.path(ctx$study_root, "outputs", "10fold_training_results.csv"))
+  )
 })
