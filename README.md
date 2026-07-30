@@ -22,7 +22,10 @@ Author delivery materials (appendix scripts, codebook) live in the monorepo sour
    is Pattern B: `access_fig_2_data` (`engine: dataverse`, file 13684074) →
    baked `outputs/10fold_training_results.csv` (committed for Shiny Live Run).
 2. **analysis_data** — merge CPED bios + proper flag → `outputs/analysis_data.dta`
-3. **run_random_forest** (optional for Figure 4) — Python notebook → RF CSVs under `outputs/`
+3. **run_random_forest** (optional for Figure 4) — Python notebook → RF CSVs under
+   `outputs/` (`run_random_forest_promotion.csv` /
+   `run_random_forest_purge.csv`, committed so fig_4 Live Run with
+   `given = "parents"` need not retrain).
 4. **Tables 1–3** — Stata from `outputs/analysis_data.dta` (parent: `analysis_data`)
 5. **Figures** — Figure 2 (Python; parent `access_fig_2_data`, reads
    `outputs/10fold_training_results.csv`), Figures 4–5 (R). Display uses
