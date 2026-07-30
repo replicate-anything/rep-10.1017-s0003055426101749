@@ -178,6 +178,9 @@ steps:
     label: Figure 2
     description: Human versus machine ratings from 10-fold cross-validation
     engine: python
+    # Pattern A: 10fold CSV is Dataverse-materialized (not in git). Shiny Live Run
+    # fails without outbound Dataverse; Display uses baked outputs/fig_2.png.
+    shiny_run: false
     inputs:
       - data/raw/10fold_training_results.csv
     data: data/raw/10fold_training_results.csv

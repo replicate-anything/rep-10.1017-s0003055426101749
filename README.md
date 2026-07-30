@@ -21,7 +21,9 @@ Author delivery materials (appendix scripts, codebook) live in the monorepo sour
 2. **analysis_data** — merge CPED bios + proper flag → `outputs/analysis_data.dta`
 3. **run_random_forest** (optional for Figure 4) — Python notebook → RF CSVs under `outputs/`
 4. **Tables 1–3** — Stata from `outputs/analysis_data.dta` (parent: `analysis_data`)
-5. **Figures** — Figure 2 (Python), Figures 4–5 (R); figure CSVs also come from materialize
+5. **Figures** — Figure 2 (Python), Figures 4–5 (R); figure CSVs also come from materialize.
+   Shiny **Display** uses baked `outputs/fig_*.png`. Figure 2 has `shiny_run: false`
+   (Live Run needs the Pattern A CSV from Dataverse; package `run_replication()` still works after `materialize_declared_data()`).
 
 ## Quick start
 
