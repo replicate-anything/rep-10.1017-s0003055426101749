@@ -29,7 +29,7 @@ dataverse:
   dataset: "10.7910/DVN/LCZERW"
   # Location wiring (not a step): materialize_declared_data() fetches into data/raw/
   # Native uploads behind .tab listings; fetch via format=original URLs
-  # fig_2 10-fold CSV is Pattern B (access_fig_2_data → outputs/), not listed here
+  # fig_2 / fig_5 CSVs are Pattern B (access_* → outputs/), not listed here
   files:
     - path: data/raw/all_asperson_original.dta
       url: https://dataverse.harvard.edu/api/access/datafile/13684082?format=original
@@ -40,18 +40,6 @@ dataverse:
     - path: data/raw/proper.dta
       url: https://dataverse.harvard.edu/api/access/datafile/13684089?format=original
       file: proper.tab
-    - path: data/raw/attractiveness.csv
-      url: https://dataverse.harvard.edu/api/access/datafile/13684105?format=original
-      file: attractiveness.tab
-    - path: data/raw/trustworthiness.csv
-      url: https://dataverse.harvard.edu/api/access/datafile/13684086?format=original
-      file: trustworthiness.tab
-    - path: data/raw/competence.csv
-      url: https://dataverse.harvard.edu/api/access/datafile/13684076?format=original
-      file: competence.tab
-    - path: data/raw/aggressiveness.csv
-      url: https://dataverse.harvard.edu/api/access/datafile/13684101?format=original
-      file: aggressiveness.tab
     - path: data/raw/all_asperson_gdpconn_undemean.csv
       url: https://dataverse.harvard.edu/api/access/datafile/13684097?format=original
       file: all_asperson_gdpconn_undemean-1.tab
@@ -234,22 +222,39 @@ steps:
     parent: fig_4
     format: format_fig_4
 
+  - id: access_fig_5_data
+    type: transform
+    label: Conjoint AMCE estimate CSVs
+    description: >
+      Author-precomputed conjoint AMCE tables (Dataverse files 13684105,
+      13684086, 13684076, 13684101). Baked under outputs/ so Shiny Live Run
+      with given=parents works offline.
+    engine: r
+    code: code/steps/access_fig_5_data.R
+    outputs:
+      - outputs/attractiveness.csv
+      - outputs/trustworthiness.csv
+      - outputs/competence.csv
+      - outputs/aggressiveness.csv
+
   - id: fig_5
     group: fig_5
     type: figure
     label: Figure 5
     description: Conjoint experiment results on individual selection preferences
+    parents:
+      - access_fig_5_data
     engine: r
     inputs:
-      - data/raw/attractiveness.csv
-      - data/raw/trustworthiness.csv
-      - data/raw/competence.csv
-      - data/raw/aggressiveness.csv
+      - outputs/attractiveness.csv
+      - outputs/trustworthiness.csv
+      - outputs/competence.csv
+      - outputs/aggressiveness.csv
     data:
-      - data/raw/attractiveness.csv
-      - data/raw/trustworthiness.csv
-      - data/raw/competence.csv
-      - data/raw/aggressiveness.csv
+      - outputs/attractiveness.csv
+      - outputs/trustworthiness.csv
+      - outputs/competence.csv
+      - outputs/aggressiveness.csv
     code: code/figures/fig_5.R
     format: format_fig_5
     outputs:

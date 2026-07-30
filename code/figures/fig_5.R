@@ -4,7 +4,8 @@
 make_fig_5 <- function(data = NULL) {
   root <- Sys.getenv("REPLICATE_STUDY_ROOT", unset = ".")
   if (!nzchar(root)) root <- "."
-  raw <- file.path(root, "data", "raw")
+  # Pattern B sinks from access_fig_5_data (baked under outputs/)
+  out <- file.path(root, "outputs")
 
   cov <- c(
     "Face with higher rating",
@@ -14,10 +15,10 @@ make_fig_5 <- function(data = NULL) {
     " -  Central government", " -  Personal aide to senior leader"
   )
 
-  dx <- readr::read_csv(file.path(raw, "attractiveness.csv"), show_col_types = FALSE) |>
-    dplyr::bind_rows(readr::read_csv(file.path(raw, "trustworthiness.csv"), show_col_types = FALSE)) |>
-    dplyr::bind_rows(readr::read_csv(file.path(raw, "competence.csv"), show_col_types = FALSE)) |>
-    dplyr::bind_rows(readr::read_csv(file.path(raw, "aggressiveness.csv"), show_col_types = FALSE)) |>
+  dx <- readr::read_csv(file.path(out, "attractiveness.csv"), show_col_types = FALSE) |>
+    dplyr::bind_rows(readr::read_csv(file.path(out, "trustworthiness.csv"), show_col_types = FALSE)) |>
+    dplyr::bind_rows(readr::read_csv(file.path(out, "competence.csv"), show_col_types = FALSE)) |>
+    dplyr::bind_rows(readr::read_csv(file.path(out, "aggressiveness.csv"), show_col_types = FALSE)) |>
     dplyr::filter(!is.na(beta)) |>
     dplyr::mutate(beta = dplyr::if_else(beta == 0, NA_real_, beta)) |>
     dplyr::mutate(

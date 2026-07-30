@@ -4,7 +4,7 @@
 outputs/staging/
 
 # Pattern A: data/raw is a materialize cache (gitignored binaries).
-# Figure 2 uses Pattern B: baked outputs/10fold_training_results.csv (tracked).
+# Figures 2 and 5 use Pattern B: baked CSVs under outputs/ (tracked).
 # Declared paths live under dataverse.files in replication.yml.
 data/raw/*
 !data/raw/README.md
